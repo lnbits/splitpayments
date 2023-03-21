@@ -1,12 +1,13 @@
 from http import HTTPStatus
+from loguru import logger
 
 from fastapi import Depends, Request
 from starlette.exceptions import HTTPException
 
 from lnbits.core.crud import get_wallet, get_wallet_for_key
-from lnbits.decorators import WalletTypeInfo, require_admin_key
+from lnbits.decorators import WalletTypeInfo, require_admin_key, check_admin
 
-from . import splitpayments_ext
+from . import splitpayments_ext, scheduled_tasks
 from .crud import get_targets, set_targets
 from .models import Target, TargetPut
 
@@ -61,3 +62,14 @@ async def api_targets_set(
             )
     await set_targets(wal.wallet.id, targets)
     return ""
+
+
+@splitpayments_ext.delete("/api/v1", status_code=HTTPStatus.OK, dependencies=[Depends(check_admin)])
+async def api_stop():
+    for t in scheduled_tasks:
+        try:
+            t.cancel()
+        except Exception as ex:
+            logger.warning(ex)
+
+    return {"success": True}
