@@ -9,7 +9,6 @@ class Target(BaseModel):
     wallet: str
     source: str
     percent: float
-    tag: Optional[str]
     alias: Optional[str]
 
     @classmethod
@@ -21,7 +20,6 @@ class TargetPut(BaseModel):
     wallet: str = Query(...)
     alias: str = Query("")
     percent: float = Query(..., ge=0, le=100)
-    tag: Optional[str]
 
 
 class TargetPutList(BaseModel):

@@ -49,7 +49,7 @@ new Vue({
           this.selectedWallet.adminkey
         )
         .then(response => {
-          this.targets = response.data;
+          this.targets = response.data
         })
         .catch(err => {
           LNbits.utils.notifyApiError(err)
@@ -60,7 +60,7 @@ new Vue({
       this.getTargets()
     },
     addTarget() {
-        this.targets.push({source: this.selectedWallet})
+      this.targets.push({source: this.selectedWallet})
     },
     saveTargets() {
       LNbits.api

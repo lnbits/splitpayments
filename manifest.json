@@ -1,9 +1,9 @@
 {
-    "repos": [
-        {
-            "id": "splitpayments",
-            "organisation": "lnbits",
-            "repository": "splitpayments"
-        }
-    ]
+  "repos": [
+    {
+      "id": "splitpayments",
+      "organisation": "lnbits",
+      "repository": "splitpayments"
+    }
+  ]
 }

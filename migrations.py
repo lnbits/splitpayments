@@ -99,14 +99,14 @@ async def m003_add_id_and_tag(db):
     await db.execute("DROP TABLE splitpayments.splitpayments_old")
 
 
-async def m004_make_tag_or_percent_optional(db):
+async def m004_remove_tag(db):
     """
-    This makes tag optional and
-    wallet not unique (useful for splitting multiple tags but same wallet)
+    This removes tag
     """
-    keys = "id,wallet,source,percent,tag,alias"
+    keys = "id,wallet,source,percent,alias"
     new_db = "splitpayments.targets"
     old_db = "splitpayments.targets_old"
+
     await db.execute(f"ALTER TABLE {new_db} RENAME TO targets_old")
     await db.execute(
         f"""
@@ -115,8 +115,8 @@ async def m004_make_tag_or_percent_optional(db):
             wallet TEXT NOT NULL,
             source TEXT NOT NULL,
             percent REAL NOT NULL CHECK (percent >= 0 AND percent <= 100),
-            tag TEXT,
-            alias TEXT
+            alias TEXT,
+            UNIQUE (source, wallet)
         );
     """
     )
