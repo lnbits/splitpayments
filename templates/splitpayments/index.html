@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% from "macros.jinja" import window_vars with context
 %} {% block page %}
 <div class="row q-col-gutter-md">
-  <div class="col-12 col-md-7 q-gutter-y-md">
+  <div class="col-12 col-md-9 q-gutter-y-md">
     <q-card class="q-pa-sm col-5">
       <q-card-section class="q-pa-none text-center">
         <q-form class="q-gutter-md">
@@ -53,30 +53,7 @@
               emit-value
             ></q-input>
 
-            <q-toggle
-              :false-value="'split'"
-              :true-value="'tag'"
-              color="primary"
-              label=""
-              value="True"
-              style="width: 180px"
-              v-model="target.method"
-              :label="`${target.method}` === 'tag' ? 'Send funds by tag' : `${target.method}` === 'split' ? 'Split funds by %' : 'Split/tag?'"
-              @input="clearChanged(t)"
-            ></q-toggle>
-
             <q-input
-              v-if="target.method == 'tag'"
-              style="width: 150px"
-              dense
-              outlined
-              v-model="target.tag"
-              label="Tag name"
-              suffix="#"
-            ></q-input>
-
-            <q-input
-              v-else-if="target.method == 'split' || target.percent >= 0"
               style="width: 150px"
               dense
               outlined
@@ -85,30 +62,40 @@
               suffix="%"
             ></q-input>
 
+            <q-input
+              style="width: 150px"
+              dense
+              outlined
+              v-model="target.tag"
+              label="Tag name"
+              suffix="#"
+            ></q-input>
             <q-btn
-              v-if="t == targets.length - 1 && (target.method == 'tag' || target.method == 'split')"
-              round
-              size="sm"
-              icon="add"
-              unelevated
-              color="primary"
-              @click="targetChanged(t)"
-            >
-              <q-tooltip>Add more</q-tooltip>
-            </q-btn>
-            <q-btn
-              v-if="t < targets.length - 1"
               @click="clearTarget(t)"
               round
               color="red"
-              size="5px"
+              size="9px"
               icon="close"
             ></q-btn>
           </div>
           <div class="row justify-evenly q-pa-lg">
             <div>
-              <q-btn unelevated outline color="secondary" @click="clearTargets">
-                Clear
+                <q-btn
+                  icon="add"
+                  unelevated
+                  color="green"
+                  @click="addTarget()"
+                >
+                  Add Target
+                </q-btn>
+            </div>
+            <div>
+              <q-btn
+                unelevated
+                @click="deleteTargets()"
+                color="red"
+              >
+                Delete all Targets
               </q-btn>
             </div>
 
@@ -117,7 +104,7 @@
                 unelevated
                 color="primary"
                 type="submit"
-                :disabled="targets.length <  2"
+                :disabled="targets.length < 1"
               >
                 Save Targets
               </q-btn>
@@ -128,17 +115,30 @@
     </q-card>
   </div>
 
-  <div class="col-12 col-md-5 q-gutter-y-md">
+  <div class="col-12 col-md-3 q-gutter-y-md">
     <q-card>
       <q-card-section>
         <h6 class="text-subtitle1 q-my-none">
           {{SITE_TITLE}} SplitPayments extension
         </h6>
       </q-card-section>
-      <q-card-section class="q-pa-none">
-        <q-separator></q-separator>
-        <q-list> {% include "splitpayments/_api_docs.html" %} </q-list>
-      </q-card-section>
+      <q-separator></q-separator>
+      <q-card>
+        <q-card-section>
+          <p>
+            Add some wallets to the list of "Target Wallets", each with an
+            associated <em>percent</em>. After saving, every time any payment
+            arrives at the "Source Wallet" that payment will be split with the
+            target wallets according to their percent.
+          </p>
+          <p>This is valid for every payment, doesn't matter how it was created.</p>
+          <p>Target wallets can be any wallet from this same LNbits instance.</p>
+          <p>
+            To remove a wallet from the targets list, just erase its fields and
+            save. To remove all, click "Clear" then save.
+          </p>
+        </q-card-section>
+      </q-card>
     </q-card>
   </div>
 </div>

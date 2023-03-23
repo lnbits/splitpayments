@@ -1,7 +1,8 @@
 from http import HTTPStatus
 from loguru import logger
+from typing import List
 
-from fastapi import Depends, Request
+from fastapi import Depends
 from starlette.exceptions import HTTPException
 
 from lnbits.core.crud import get_wallet, get_wallet_for_key
@@ -9,23 +10,21 @@ from lnbits.decorators import WalletTypeInfo, require_admin_key, check_admin
 
 from . import splitpayments_ext, scheduled_tasks
 from .crud import get_targets, set_targets
-from .models import Target, TargetPut
+from .models import Target, TargetPutList
 
 
 @splitpayments_ext.get("/api/v1/targets")
-async def api_targets_get(wallet: WalletTypeInfo = Depends(require_admin_key)):
+async def api_targets_get(wallet: WalletTypeInfo = Depends(require_admin_key)) -> List[Target]:
     targets = await get_targets(wallet.wallet.id)
-    return [target.dict() for target in targets] or []
+    return targets or []
 
 
-@splitpayments_ext.put("/api/v1/targets")
+@splitpayments_ext.put("/api/v1/targets", status_code=HTTPStatus.OK)
 async def api_targets_set(
-    req: Request, wal: WalletTypeInfo = Depends(require_admin_key)
-):
-    body = await req.json()
-    targets = []
-    data = TargetPut.parse_obj(body["targets"])
-    for entry in data.__root__:
+    target_put: TargetPutList, source_wallet: WalletTypeInfo = Depends(require_admin_key)
+) -> None:
+    targets: List[Target] = []
+    for entry in target_put.targets:
         wallet = await get_wallet(entry.wallet)
         if not wallet:
             wallet = await get_wallet_for_key(entry.wallet, "invoice")
@@ -35,12 +34,12 @@ async def api_targets_set(
                     detail=f"Invalid wallet '{entry.wallet}'.",
                 )
 
-        if wallet.id == wal.wallet.id:
+        if wallet.id == source_wallet.wallet.id:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail="Can't split to itself."
             )
 
-        if entry.percent < 0:
+        if entry.percent <= 0:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail=f"Invalid percent '{entry.percent}'.",
@@ -49,21 +48,42 @@ async def api_targets_set(
         targets.append(
             Target(
                 wallet=wallet.id,
-                source=wal.wallet.id,
+                source=source_wallet.wallet.id,
                 tag=entry.tag,
                 percent=entry.percent,
                 alias=entry.alias,
             )
         )
-        percent_sum = sum([target.percent for target in targets])
+
+        # exclude tags
+        percent_sum = sum([target.percent for target in targets if not target.tag])
         if percent_sum > 100:
             raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST, detail="Splitting over 100%."
+                status_code=HTTPStatus.BAD_REQUEST, detail="Splitting over 100%"
             )
-    await set_targets(wal.wallet.id, targets)
-    return ""
+
+        # check every tag
+        tags: List[str] = []
+        for target in targets:
+            if target.tag and target.tag not in tags:
+                tags.append(target.tag)
+
+        for tag in tags:
+            percent_sum = sum([target.percent for target in targets if target.tag == tag])
+            if percent_sum > 100:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST, detail=f"Splitting over 100% for tag {tag}"
+                )
+
+    await set_targets(source_wallet.wallet.id, targets)
 
 
+@splitpayments_ext.delete("/api/v1/targets", status_code=HTTPStatus.OK)
+async def api_targets_delete(source_wallet: WalletTypeInfo = Depends(require_admin_key)) -> None:
+    await set_targets(source_wallet.wallet.id, [])
+
+
+# deinit extension invoice listener
 @splitpayments_ext.delete("/api/v1", status_code=HTTPStatus.OK, dependencies=[Depends(check_admin)])
 async def api_stop():
     for t in scheduled_tasks:
@@ -71,5 +91,4 @@ async def api_stop():
             t.cancel()
         except Exception as ex:
             logger.warning(ex)
-
     return {"success": True}
