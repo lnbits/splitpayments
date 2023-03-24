@@ -26,46 +26,54 @@ async def api_targets_set(
     target_put: TargetPutList,
     source_wallet: WalletTypeInfo = Depends(require_admin_key),
 ) -> None:
-    targets: List[Target] = []
-    for entry in target_put.targets:
+    try:
+        targets: List[Target] = []
+        for entry in target_put.targets:
 
-        if entry.wallet.find("@") < 0 and entry.wallet.find("LNURL") < 0:
-            wallet = await get_wallet(entry.wallet)
-            if not wallet:
-                wallet = await get_wallet_for_key(entry.wallet, "invoice")
+            if entry.wallet.find("@") < 0 and entry.wallet.find("LNURL") < 0:
+                wallet = await get_wallet(entry.wallet)
                 if not wallet:
+                    wallet = await get_wallet_for_key(entry.wallet, "invoice")
+                    if not wallet:
+                        raise HTTPException(
+                            status_code=HTTPStatus.BAD_REQUEST,
+                            detail=f"Invalid wallet '{entry.wallet}'.",
+                        )
+
+                if wallet.id == source_wallet.wallet.id:
                     raise HTTPException(
-                        status_code=HTTPStatus.BAD_REQUEST,
-                        detail=f"Invalid wallet '{entry.wallet}'.",
+                        status_code=HTTPStatus.BAD_REQUEST, detail="Can't split to itself."
                     )
 
-            if wallet.id == source_wallet.wallet.id:
+            if entry.percent <= 0:
                 raise HTTPException(
-                    status_code=HTTPStatus.BAD_REQUEST, detail="Can't split to itself."
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Invalid percent '{entry.percent}'.",
                 )
 
-        if entry.percent <= 0:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST,
-                detail=f"Invalid percent '{entry.percent}'.",
+            targets.append(
+                Target(
+                    wallet=entry.wallet,
+                    source=source_wallet.wallet.id,
+                    percent=entry.percent,
+                    alias=entry.alias,
+                )
             )
 
-        targets.append(
-            Target(
-                wallet=entry.wallet,
-                source=source_wallet.wallet.id,
-                percent=entry.percent,
-                alias=entry.alias,
-            )
+            percent_sum = sum([target.percent for target in targets])
+            if percent_sum > 100:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST, detail="Splitting over 100%"
+                )
+
+        await set_targets(source_wallet.wallet.id, targets)
+
+    except Exception as ex:
+        logger.warning(ex)
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Cannot set targets.",
         )
-
-        percent_sum = sum([target.percent for target in targets])
-        if percent_sum > 100:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST, detail="Splitting over 100%"
-            )
-
-    await set_targets(source_wallet.wallet.id, targets)
 
 
 @splitpayments_ext.delete("/api/v1/targets", status_code=HTTPStatus.OK)
