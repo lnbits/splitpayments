@@ -9,7 +9,7 @@ from loguru import logger
 from lnbits import bolt11
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
-from lnbits.core.services import create_invoice, pay_invoice
+from lnbits.core.services import create_invoice, pay_invoice, fee_reserve
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
@@ -54,8 +54,9 @@ async def on_invoice_paid(payment: Payment) -> None:
             )
 
             if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
+                safe_amount_msat = amount_msat - fee_reserve(amount_msat)
                 payment_request = await get_lnurl_invoice(
-                    target.wallet, payment.wallet_id, amount_msat, memo
+                    target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
             else:
                 _, payment_request = await create_invoice(
