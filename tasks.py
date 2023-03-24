@@ -1,9 +1,15 @@
 import asyncio
+import json
+from math import floor
+from typing import Optional
 
+import httpx
 from loguru import logger
 
+from lnbits import bolt11
+from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
-from lnbits.core.services import create_invoice, pay_invoice
+from lnbits.core.services import create_invoice, pay_invoice, fee_reserve
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
@@ -30,7 +36,6 @@ async def on_invoice_paid(payment: Payment) -> None:
     if not targets:
         return
 
-    # validate target percentages
     total_percent = sum([target.percent for target in targets])
 
     if total_percent > 100:
@@ -39,38 +44,84 @@ async def on_invoice_paid(payment: Payment) -> None:
 
     logger.trace(f"splitpayments: performing split payments to {len(targets)} targets")
 
-    if payment.extra.get("amount"):
-        amount_to_split = (payment.extra.get("amount") or 0) * 1000
-    else:
-        amount_to_split = payment.amount
-
-    if not amount_to_split:
-        logger.error("splitpayments: no amount to split")
-        return
-
     for target in targets:
-        tagged = target.tag in payment.extra
 
-        if tagged or target.percent > 0:
+        if target.percent > 0:
 
-            if tagged:
-                memo = f"Pushed tagged payment to {target.alias}"
-                amount_msat = int(amount_to_split)
-            else:
-                amount_msat = int(amount_to_split * target.percent / 100)
-                memo = f"Split payment: {target.percent}% for {target.alias or target.wallet}"
-
-            payment_hash, payment_request = await create_invoice(
-                wallet_id=target.wallet,
-                amount=int(amount_msat / 1000),
-                internal=True,
-                memo=memo,
+            amount_msat = int(payment.amount * target.percent / 100)
+            memo = (
+                f"Split payment: {target.percent}% for {target.alias or target.wallet}"
             )
+
+            if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
+                safe_amount_msat = amount_msat - fee_reserve(amount_msat)
+                payment_request = await get_lnurl_invoice(
+                    target.wallet, payment.wallet_id, safe_amount_msat, memo
+                )
+            else:
+                _, payment_request = await create_invoice(
+                    wallet_id=target.wallet,
+                    amount=int(amount_msat / 1000),
+                    internal=True,
+                    memo=memo,
+                )
 
             extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
 
-            await pay_invoice(
-                payment_request=payment_request,
-                wallet_id=payment.wallet_id,
-                extra=extra,
+            if payment_request:
+                await pay_invoice(
+                    payment_request=payment_request,
+                    wallet_id=payment.wallet_id,
+                    description=memo,
+                    extra=extra,
+                )
+
+
+async def get_lnurl_invoice(
+    payoraddress, wallet_id, amount_msat, memo
+) -> Optional[str]:
+
+    from lnbits.core.views.api import api_lnurlscan
+
+    data = await api_lnurlscan(payoraddress)
+    rounded_amount = floor(amount_msat / 1000) * 1000
+
+    async with httpx.AsyncClient() as client:
+        try:
+            r = await client.get(
+                data["callback"],
+                params={"amount": rounded_amount, "comment": memo},
+                timeout=40,
             )
+            if r.is_error:
+                raise httpx.ConnectError("issue with scrub callback")
+            r.raise_for_status()
+        except (httpx.ConnectError, httpx.RequestError):
+            logger.error(
+                f"splitting LNURL failed: Failed to connect to {data['callback']}."
+            )
+            return None
+        except Exception as exc:
+            logger.error(f"splitting LNURL failed: {str(exc)}.")
+            return None
+
+    params = json.loads(r.text)
+    if params.get("status") == "ERROR":
+        logger.error(f"{data['callback']} said: '{params.get('reason', '')}'")
+        return None
+
+    invoice = bolt11.decode(params["pr"])
+
+    lnurlp_payment = await get_standalone_payment(invoice.payment_hash)
+
+    if lnurlp_payment and lnurlp_payment.wallet_id == wallet_id:
+        logger.error(f"split failed. cannot split payments to yourself via LNURL.")
+        return None
+
+    if invoice.amount_msat != rounded_amount:
+        logger.error(
+            f"{data['callback']} returned an invalid invoice. Expected {amount_msat} msat, got {invoice.amount_msat}."
+        )
+        return None
+
+    return params["pr"]

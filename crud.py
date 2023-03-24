@@ -22,15 +22,14 @@ async def set_targets(source_wallet: str, targets: List[Target]):
             await conn.execute(
                 """
                 INSERT INTO splitpayments.targets
-                  (id, source, wallet, percent, tag, alias)
-                VALUES (?, ?, ?, ?, ?, ?)
+                  (id, source, wallet, percent, alias)
+                VALUES (?, ?, ?, ?, ?)
             """,
                 (
                     urlsafe_short_hash(),
                     source_wallet,
                     target.wallet,
                     target.percent,
-                    target.tag,
                     target.alias,
                 ),
             )

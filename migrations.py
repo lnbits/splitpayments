@@ -97,3 +97,28 @@ async def m003_add_id_and_tag(db):
         )
 
     await db.execute("DROP TABLE splitpayments.splitpayments_old")
+
+
+async def m004_remove_tag(db):
+    """
+    This removes tag
+    """
+    keys = "id,wallet,source,percent,alias"
+    new_db = "splitpayments.targets"
+    old_db = "splitpayments.targets_old"
+
+    await db.execute(f"ALTER TABLE {new_db} RENAME TO targets_old")
+    await db.execute(
+        f"""
+        CREATE TABLE {new_db} (
+            id TEXT PRIMARY KEY,
+            wallet TEXT NOT NULL,
+            source TEXT NOT NULL,
+            percent REAL NOT NULL CHECK (percent >= 0 AND percent <= 100),
+            alias TEXT,
+            UNIQUE (source, wallet)
+        );
+    """
+    )
+    await db.execute(f"INSERT INTO {new_db} ({keys}) SELECT {keys} FROM {old_db}")
+    await db.execute(f"DROP TABLE {old_db}")

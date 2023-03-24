@@ -9,7 +9,6 @@ class Target(BaseModel):
     wallet: str
     source: str
     percent: float
-    tag: str
     alias: Optional[str]
 
     @classmethod
@@ -17,12 +16,11 @@ class Target(BaseModel):
         return cls(**dict(row))
 
 
-class TargetPutList(BaseModel):
+class TargetPut(BaseModel):
     wallet: str = Query(...)
     alias: str = Query("")
-    percent: float = Query(..., ge=0, lt=100)
-    tag: str
+    percent: float = Query(..., ge=0, le=100)
 
 
-class TargetPut(BaseModel):
-    __root__: List[TargetPutList]
+class TargetPutList(BaseModel):
+    targets: List[TargetPut]
