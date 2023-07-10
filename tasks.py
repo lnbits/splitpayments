@@ -9,7 +9,7 @@ from loguru import logger
 from lnbits import bolt11
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
-from lnbits.core.services import create_invoice, pay_invoice, fee_reserve
+from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 
@@ -65,8 +65,11 @@ async def on_invoice_paid(payment: Payment) -> None:
                     internal=True,
                     memo=memo,
                 )
-
-            extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
+            
+            extra = payment.extra.copy()
+            extra.pop("fiatAmount", None)
+            extra["tag"] = "splitpayments"
+            extra["splitted"] = True
 
             if payment_request:
                 await pay_invoice(
