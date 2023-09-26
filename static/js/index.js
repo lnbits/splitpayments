@@ -34,8 +34,10 @@ new Vue({
   },
   methods: {
     clearTarget(index) {
+      if(this.targets.length == 1) {
+        return this.deleteTargets()
+      }
       this.targets.splice(index, 1)
-      console.log(this.targets)
       this.$q.notify({
         message: 'Removed item. You must click to save manually.',
         timeout: 500
@@ -84,7 +86,7 @@ new Vue({
     },
     deleteTargets() {
       LNbits.utils
-        .confirmDialog('Are you sure you want to delete the targets?')
+        .confirmDialog('Are you sure you want to delete all targets?')
         .onOk(() => {
           this.targets = []
           LNbits.api
