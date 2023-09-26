@@ -3,5 +3,5 @@
   "short_description": "Split incoming payments across wallets",
   "tile": "/splitpayments/static/image/split-payments.png",
   "contributors": ["fiatjaf", "cryptograffiti"],
-  "min_lnbits_version": "0.XX.0"
+  "min_lnbits_version": "0.11.0"
 }
