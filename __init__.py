@@ -2,7 +2,6 @@ import asyncio
 from typing import List
 
 from fastapi import APIRouter
-from fastapi.staticfiles import StaticFiles
 
 from lnbits.db import Database
 from lnbits.helpers import template_renderer
@@ -15,7 +14,6 @@ scheduled_tasks: List[asyncio.Task] = []
 splitpayments_static_files = [
     {
         "path": "/splitpayments/static",
-        "app": StaticFiles(packages=[("lnbits", "extensions/splitpayments/static")]),
         "name": "splitpayments_static",
     }
 ]
@@ -25,7 +23,7 @@ splitpayments_ext: APIRouter = APIRouter(
 
 
 def splitpayments_renderer():
-    return template_renderer(["lnbits/extensions/splitpayments/templates"])
+    return template_renderer(["splitpayments/templates"])
 
 
 from .tasks import wait_for_paid_invoices
