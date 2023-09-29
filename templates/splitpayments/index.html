@@ -34,7 +34,7 @@
             <q-input
               dense
               outlined
-              v-model="target.alias"
+              v-model.trim="target.alias"
               label="Alias"
               :hint="t === targets.length - 1 ? 'A name to identify this target wallet locally.' : undefined"
               style="width: 150px"
@@ -42,7 +42,7 @@
 
             <q-input
               dense
-              v-model="target.wallet"
+              v-model.trim="target.wallet"
               label="Target"
               hint="A wallet ID, invoice key, LNURLp or Lightning Address."
               option-label="name"
