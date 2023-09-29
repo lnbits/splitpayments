@@ -3,6 +3,10 @@ import json
 from math import floor
 from typing import Optional
 
+import bech32
+import websockets
+import json
+
 import httpx
 from loguru import logger
 
@@ -16,7 +20,7 @@ from lnbits.tasks import register_invoice_listener
 from .crud import get_targets
 
 
-async def wait_for_paid_invoices():
+async def wait_for_paid_invoices():    
     invoice_queue = asyncio.Queue()
     register_invoice_listener(invoice_queue, get_current_extension_name())
 
@@ -25,14 +29,13 @@ async def wait_for_paid_invoices():
         await on_invoice_paid(payment)
 
 
-async def on_invoice_paid(payment: Payment) -> None:
-
+async def on_invoice_paid(payment: Payment) -> None:    
     if payment.extra.get("tag") == "splitpayments" or payment.extra.get("splitted"):
         # already a splitted payment, ignore
         return
-
+    
     targets = await get_targets(payment.wallet_id)
-
+    
     if not targets:
         return
 
@@ -53,12 +56,24 @@ async def on_invoice_paid(payment: Payment) -> None:
                 f"Split payment: {target.percent}% for {target.alias or target.wallet}"
             )
 
-            if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
+            npubWallet = ''
+            if target.wallet.find("npub") >= 0:
+                npubWallet = await get_npub_address(target.wallet)                        
+            
+            # if npubWallet is not empty, use it as the target wallet
+            if npubWallet != '':
+                targetWallet = npubWallet
+            else:
+                targetWallet = target.wallet
+    
+            print(targetWallet  + " " + str(amount_msat) + " " + memo)
+
+            if targetWallet.find("@") >= 0 or targetWallet.find("LNURL") >= 0:                
                 safe_amount_msat = amount_msat - fee_reserve(amount_msat)
                 payment_request = await get_lnurl_invoice(
-                    target.wallet, payment.wallet_id, safe_amount_msat, memo
+                    targetWallet, payment.wallet_id, safe_amount_msat, memo
                 )
-            else:
+            else:                
                 _, payment_request = await create_invoice(
                     wallet_id=target.wallet,
                     amount=int(amount_msat / 1000),
@@ -76,6 +91,47 @@ async def on_invoice_paid(payment: Payment) -> None:
                     extra=extra,
                 )
 
+async def get_npub_address(    
+    npub: str
+) -> Optional[str]: 
+    
+    hrp, data = bech32.bech32_decode(npub)
+    raw_secret = bech32.convertbits(data, 5, 8)
+    if raw_secret[-1] != 0x0:
+        pubkey = str(bytes(raw_secret).hex())        
+    else:
+        pubkey = str(bytes(raw_secret[:-1]).hex()) 
+    
+    print("trying to get npub: ", pubkey)
+    uri = "wss://nostr-pub.wellorder.net"
+    jsonOb = ''
+                
+    # TODO utilize a try except and find out why websocket is not connecting
+    async with websockets.connect(uri) as websocket:
+    #websocket = websockets.connect(uri)
+        req = '["REQ", "a",  {"kinds": [0], "limit": 10, "authors": ["'+ pubkey +'"]} ]'
+        ''' send req to websocket and print response'''
+        await websocket.send(req)                    
+        greeting = await websocket.recv()
+        output = json.loads(greeting)
+        jsonOb = json.loads(output[2]['content'])
+
+    #npubWallet06 = ''
+    #npubWallet16 = ''
+    npubWallet = ''                    
+    if "lud16" in jsonOb and npubWallet == '':
+        logger.info("we got a lud16: ", jsonOb["lud16"])
+        if len(jsonOb["lud16"]) > 1:
+            npubWallet = jsonOb["lud16"]
+    #if "lud06" in jsonOb:
+    #    logger.info("we got a lud06: ", jsonOb["lud06"])
+    #    if len(jsonOb["lud06"]) > 1:
+    #        npubWallet = jsonOb["lud06"]
+
+    if npubWallet == '':
+        print("Failed to get npub wallet")
+
+    return npubWallet
 
 async def get_lnurl_invoice(
     payoraddress, wallet_id, amount_msat, memo
