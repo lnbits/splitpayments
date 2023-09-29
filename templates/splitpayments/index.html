@@ -34,7 +34,7 @@
             <q-input
               dense
               outlined
-              v-model.trim="target.alias"
+              v-model="target.alias"
               label="Alias"
               :hint="t === targets.length - 1 ? 'A name to identify this target wallet locally.' : undefined"
               style="width: 150px"
@@ -42,9 +42,9 @@
 
             <q-input
               dense
-              v-model.trim="target.wallet"
+              v-model="target.wallet"
               label="Target"
-              hint="A wallet ID, invoice key, LNURLp or Lightning Address."
+              hint="A wallet ID, invoice key, LNURLp, NPUB, or Lightning Address."
               option-label="name"
               style="width: 500px"
               new-value-mode="add-unique"
@@ -118,12 +118,10 @@
             This is valid for every payment, doesn't matter how it was created.
           </p>
           <p>
-            Targets can be LNBits wallets from this LNBits instance or any valid
-            LNURL or LN Address.
+            Targets can be LNBits wallets from this LNBits instance or any valid LNURL or LN Address.
           </p>
           <p class="text-warning">
-            LNURLp and LN Addresses must allow comments > 100 chars and also
-            have a flexible amount.
+              LNURLp and LN Addresses must allow comments > 100 chars and also have a flexible amount.
           </p>
           <p>
             To remove a wallet from the targets list just press the X and save.
