@@ -77,10 +77,57 @@ async def on_invoice_paid(payment: Payment) -> None:
                 )
 
 
-async def get_lnurl_invoice(
-    payoraddress, wallet_id, amount_msat, memo
-) -> Optional[str]:
+async def execute_split(wallet_id, amount):
 
+    targets = await get_targets(wallet_id)
+
+    if not targets:
+        return
+
+    total_percent = sum([target.percent for target in targets])
+
+    if total_percent > 100:
+        logger.error("splitpayment: total percent adds up to more than 100%")
+        return
+
+    logger.trace(f"splitpayments: performing split payments to {len(targets)} targets")
+
+    for target in targets:
+
+        if target.percent > 0:
+
+            amount_msat = int(amount * target.percent / 100)
+            memo = (
+                f"Split payment: {target.percent}% for {target.alias or target.wallet}"
+            )
+
+            if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
+                safe_amount_msat = amount_msat - fee_reserve(amount_msat)
+                payment_request = await get_lnurl_invoice(
+                    target.wallet, wallet_id, safe_amount_msat, memo
+                )
+            else:
+                _, payment_request = await create_invoice(
+                    wallet_id=target.wallet,
+                    amount=int(amount_msat / 1000),
+                    internal=True,
+                    memo=memo,
+                )
+
+            extra = {"tag": "splitpayments", "splitted": True}
+
+            if payment_request:
+                await pay_invoice(
+                    payment_request=payment_request,
+                    wallet_id=wallet_id,
+                    description=memo,
+                    extra=extra,
+                )
+
+
+async def get_lnurl_invoice(
+        payoraddress, wallet_id, amount_msat, memo
+) -> Optional[str]:
     from lnbits.core.views.api import api_lnurlscan
 
     data = await api_lnurlscan(payoraddress)

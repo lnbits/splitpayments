@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException
 from lnbits.core.crud import get_wallet, get_wallet_for_key
 from lnbits.decorators import WalletTypeInfo, check_admin, require_admin_key
 
+from tasks import execute_split
 from . import scheduled_tasks, splitpayments_ext
 from .crud import get_targets, set_targets
 from .models import Target, TargetPutList
@@ -20,6 +21,11 @@ async def api_targets_get(
     targets = await get_targets(wallet.wallet.id)
     return targets or []
 
+
+@splitpayments_ext.post("/api/v1/execute_split", status_code=HTTPStatus.OK)
+async def api_execute_split(wallet_id: str, amount: int) -> None:
+    result = await execute_split(wallet_id, amount)
+    return result
 
 @splitpayments_ext.put("/api/v1/targets", status_code=HTTPStatus.OK)
 async def api_targets_set(
