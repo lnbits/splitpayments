@@ -97,8 +97,12 @@ async def execute_split(wallet_id, amount):
         if target.percent > 0:
 
             amount_msat = int(amount * target.percent / 100)
+
+            if amount_msat < 1000:
+                continue
+
             memo = (
-                f"Split payment: {target.percent}% for {target.alias or target.wallet}"
+                f"{target.alias or target.wallet}"
             )
 
             if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
