@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException
 from lnbits.core.crud import get_wallet, get_wallet_for_key
 from lnbits.decorators import WalletTypeInfo, check_admin, require_admin_key
 
-from tasks import execute_split
+from .tasks import execute_split
 from . import scheduled_tasks, splitpayments_ext
 from .crud import get_targets, set_targets
 from .models import Target, TargetPutList
