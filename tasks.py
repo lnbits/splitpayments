@@ -69,7 +69,7 @@ async def on_invoice_paid(payment: Payment) -> None:
             extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
 
             if payment_request:
-                return pay_invoice(
+                await pay_invoice(
                     payment_request=payment_request,
                     wallet_id=payment.wallet_id,
                     description=memo,
@@ -117,7 +117,7 @@ async def execute_split(wallet_id, amount):
             extra = {"tag": "splitpayments", "splitted": True}
 
             if payment_request:
-                await pay_invoice(
+                return pay_invoice(
                     payment_request=payment_request,
                     wallet_id=wallet_id,
                     description=memo,
