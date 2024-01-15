@@ -24,7 +24,7 @@ async def api_targets_get(
 
 @splitpayments_ext.post("/api/v1/execute_split", status_code=HTTPStatus.OK)
 async def api_execute_split(wallet_id: str, amount: int) -> None:
-    result = execute_split(wallet_id, amount)
+    result = await execute_split(wallet_id, amount)
     return result
 
 @splitpayments_ext.put("/api/v1/targets", status_code=HTTPStatus.OK)
