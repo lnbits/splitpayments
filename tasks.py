@@ -53,6 +53,9 @@ async def on_invoice_paid(payment: Payment) -> None:
                 f"{target.alias or target.wallet}"
             )
 
+            if amount_msat < 1000:
+                continue
+
             if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
                 safe_amount_msat = amount_msat - fee_reserve(amount_msat)
                 payment_request = await get_lnurl_invoice(
@@ -97,6 +100,10 @@ async def execute_split(wallet_id, amount):
         if target.percent > 0:
 
             amount_msat = int(amount * target.percent / 100)
+
+            if amount_msat < 1000:
+                continue
+
             memo = (
                 f"Split payment: {target.percent}% for {target.alias or target.wallet}"
             )
