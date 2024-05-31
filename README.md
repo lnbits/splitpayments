@@ -40,6 +40,7 @@ IMPORTANT:
 <img width="1148" alt="Bildschirm­foto 2023-05-01 um 22 14 36" src="https://user-images.githubusercontent.com/63317640/235534056-49296aeb-7295-4b4e-9f57-914a677f5ad4.png">
 <img width="1402" alt="Bildschirm­foto 2023-05-01 um 22 17 52" src="https://user-images.githubusercontent.com/63317640/235534063-b2734654-7c1a-48a3-b48e-32798c232b49.png">
 
+
 ## Sponsored by
 
 [![](https://cdn.shopify.com/s/files/1/0826/9235/files/cryptograffiti_logo_clear_background.png?v=1504730421)](https://cryptograffiti.com/)
