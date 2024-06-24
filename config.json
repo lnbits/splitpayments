@@ -2,6 +2,56 @@
   "name": "Split Payments",
   "short_description": "Split incoming payments across wallets",
   "tile": "/splitpayments/static/image/split-payments.png",
-  "contributors": ["fiatjaf", "cryptograffiti"],
-  "min_lnbits_version": "0.11.0"
+  "min_lnbits_version": "0.11.0",
+  "contributors": [
+    {
+      "name": "cryptograffiti",
+      "uri": "https://github.com/cryptograffiti",
+      "role": "Idea/Sponsor"
+    },
+    {
+      "name": "fiatjaf",
+      "uri": "https://github.com/fiatjaf",
+      "role": "Developer"
+    },
+    {
+      "name": "dni",
+      "uri": "https://github.com/dni",
+      "role": "Developer"
+    },
+    {
+      "name": "talvasconcelos",
+      "uri": "https://github.com/talvasconcelos",
+      "role": "Developer"
+    },
+    {
+      "name": "prusnak",
+      "uri": "https://github.com/prusnak",
+      "role": "Developer"
+    },
+    {
+      "name": "arbadacarbaYK",
+      "uri": "https://github.com/arbadacarbaYK",
+      "role": "Developer"
+    },
+    {
+      "name": "arcbtc",
+      "uri": "https://github.com/arcbtc",
+      "role": "Developer"
+    }
+  ],
+  "images": [
+    {
+      "uri": "https://raw.githubusercontent.com/lnbits/splitpayments/main/static/image/1.png"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/lnbits/splitpayments/main/static/image/2.png"
+    },
+    {
+      "uri": "https://raw.githubusercontent.com/lnbits/splitpayments/main/static/image/3.png"
+    }
+  ],
+  "description_md": "https://raw.githubusercontent.com/lnbits/splitpayments/main/description.md",
+  "terms_and_conditions_md": "https://raw.githubusercontent.com/lnbits/splitpayments/main/toc.md",
+  "license": "MIT"
 }
