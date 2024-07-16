@@ -43,15 +43,13 @@ async def on_invoice_paid(payment: Payment) -> None:
     logger.trace(f"splitpayments: performing split payments to {len(targets)} targets")
 
     for target in targets:
-
         if target.percent > 0:
-
             amount_msat = int(payment.amount * target.percent / 100)
             memo = (
                 f"Split payment: {target.percent}% for {target.alias or target.wallet}"
             )
 
-            if target.wallet.find("@") >= 0 or target.wallet.find("LNURL") >= 0:
+            if "@" in target.wallet or "LNURL" in target.wallet:
                 safe_amount_msat = amount_msat - fee_reserve(amount_msat)
                 payment_request = await get_lnurl_invoice(
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
@@ -71,12 +69,23 @@ async def on_invoice_paid(payment: Payment) -> None:
             extra = {**payment.extra, "splitted": True}
 
             if payment_request:
-                await pay_invoice(
+                asyncio.create_task(pay_invoice_in_background(
                     payment_request=payment_request,
                     wallet_id=payment.wallet_id,
                     description=memo,
-                    extra=extra,
-                )
+                    extra=extra
+                ))
+
+async def pay_invoice_in_background(payment_request, wallet_id, description, extra):
+    try:
+        await pay_invoice(
+            payment_request=payment_request,
+            wallet_id=wallet_id,
+            description=description,
+            extra=extra,
+        )
+    except Exception as e:
+        logger.error(f"Failed to pay invoice: {e}")
 
 
 async def get_lnurl_invoice(
