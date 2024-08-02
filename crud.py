@@ -1,9 +1,11 @@
 from typing import List
 
+from lnbits.db import Database
 from lnbits.helpers import urlsafe_short_hash
 
-from . import db
 from .models import Target
+
+db = Database("ext_splitpayments")
 
 
 async def get_targets(source_wallet: str) -> List[Target]:

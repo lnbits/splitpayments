@@ -1,39 +1,38 @@
 from http import HTTPStatus
-from typing import List
 
-from fastapi import Depends
-from loguru import logger
-from starlette.exceptions import HTTPException
-
+from fastapi import APIRouter, Depends, HTTPException
 from lnbits.core.crud import get_wallet, get_wallet_for_key
-from lnbits.decorators import WalletTypeInfo, require_admin_key
+from lnbits.core.models import WalletTypeInfo
+from lnbits.decorators import require_admin_key
+from loguru import logger
 
-from . import splitpayments_ext
 from .crud import get_targets, set_targets
 from .models import Target, TargetPutList
 
+splitpayments_api_router = APIRouter()
 
-@splitpayments_ext.get("/api/v1/targets")
+
+@splitpayments_api_router.get("/api/v1/targets")
 async def api_targets_get(
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> List[Target]:
+) -> list[Target]:
     targets = await get_targets(wallet.wallet.id)
     return targets or []
 
 
-@splitpayments_ext.put("/api/v1/targets", status_code=HTTPStatus.OK)
+@splitpayments_api_router.put("/api/v1/targets", status_code=HTTPStatus.OK)
 async def api_targets_set(
     target_put: TargetPutList,
     source_wallet: WalletTypeInfo = Depends(require_admin_key),
 ) -> None:
     try:
-        targets: List[Target] = []
+        targets: list[Target] = []
         for entry in target_put.targets:
 
             if entry.wallet.find("@") < 0 and entry.wallet.find("LNURL") < 0:
                 wallet = await get_wallet(entry.wallet)
                 if not wallet:
-                    wallet = await get_wallet_for_key(entry.wallet, "invoice")
+                    wallet = await get_wallet_for_key(entry.wallet)
                     if not wallet:
                         raise HTTPException(
                             status_code=HTTPStatus.BAD_REQUEST,
@@ -74,10 +73,10 @@ async def api_targets_set(
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Cannot set targets.",
-        )
+        ) from ex
 
 
-@splitpayments_ext.delete("/api/v1/targets", status_code=HTTPStatus.OK)
+@splitpayments_api_router.delete("/api/v1/targets", status_code=HTTPStatus.OK)
 async def api_targets_delete(
     source_wallet: WalletTypeInfo = Depends(require_admin_key),
 ) -> None:
