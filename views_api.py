@@ -42,7 +42,8 @@ async def api_targets_set(
 
                 if wallet.id == source_wallet.wallet.id:
                     raise HTTPException(
-                        status_code=HTTPStatus.BAD_REQUEST, detail="Can't split to itself."
+                        status_code=HTTPStatus.BAD_REQUEST,
+                        detail="Can't split to itself.",
                     )
 
             if entry.percent <= 0:

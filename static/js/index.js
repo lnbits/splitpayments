@@ -34,7 +34,7 @@ new Vue({
   },
   methods: {
     clearTarget(index) {
-      if(this.targets.length == 1) {
+      if (this.targets.length == 1) {
         return this.deleteTargets()
       }
       this.targets.splice(index, 1)

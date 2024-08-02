@@ -31,12 +31,14 @@ from .views_api import *  # noqa: F401,F403
 
 scheduled_tasks: list[asyncio.Task] = []
 
+
 def splitpayments_stop():
     for task in scheduled_tasks:
         try:
             task.cancel()
         except Exception as ex:
             logger.warning(ex)
+
 
 def splitpayments_start():
     task = create_permanent_unique_task("ext_splitpayments", wait_for_paid_invoices)
