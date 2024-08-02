@@ -3,15 +3,14 @@ import json
 from math import floor
 from typing import Optional
 
+import bolt11
 import httpx
-from loguru import logger
-
-from lnbits import bolt11
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
 from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
 from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
+from loguru import logger
 
 from .crud import get_targets
 
@@ -102,7 +101,7 @@ async def get_lnurl_invoice(
             )
             return None
         except Exception as exc:
-            logger.error(f"splitting LNURL failed: {str(exc)}.")
+            logger.error(f"splitting LNURL failed: {exc!s}.")
             return None
 
     params = json.loads(r.text)
@@ -115,12 +114,15 @@ async def get_lnurl_invoice(
     lnurlp_payment = await get_standalone_payment(invoice.payment_hash)
 
     if lnurlp_payment and lnurlp_payment.wallet_id == wallet_id:
-        logger.error(f"split failed. cannot split payments to yourself via LNURL.")
+        logger.error("split failed. cannot split payments to yourself via LNURL.")
         return None
 
     if invoice.amount_msat != rounded_amount:
         logger.error(
-            f"{data['callback']} returned an invalid invoice. Expected {amount_msat} msat, got {invoice.amount_msat}."
+            f"""
+        {data['callback']} returned an invalid invoice.
+        Expected {amount_msat} msat, got {invoice.amount_msat}.
+        """
         )
         return None
 
