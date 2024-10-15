@@ -76,11 +76,9 @@ async def m003_add_id_and_tag(db):
         );
     """
     )
-
-    for row in [
-        list(row)
-        for row in await db.fetchall("SELECT * FROM splitpayments.splitpayments_old")
-    ]:
+    result = await db.execute("SELECT * FROM splitpayments.splitpayments_old")
+    rows = await result.mappings().all()
+    for row in rows:
         await db.execute(
             """
             INSERT INTO splitpayments.targets (
@@ -91,9 +89,16 @@ async def m003_add_id_and_tag(db):
                 tag,
                 alias
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (:id, :wallet, :source, :percent, :tag, :alias)
             """,
-            (urlsafe_short_hash(), row[0], row[1], row[2], "", row[3]),
+            {
+                "id": urlsafe_short_hash(),
+                "wallet": row["wallet"],
+                "source": row["source"],
+                "percent": row["percent"],
+                "tag": row["tag"],
+                "alias": row["alias"],
+            },
         )
 
     await db.execute("DROP TABLE splitpayments.splitpayments_old")
