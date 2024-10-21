@@ -8,7 +8,6 @@ import httpx
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
 from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
-from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 from loguru import logger
 
@@ -17,7 +16,7 @@ from .crud import get_targets
 
 async def wait_for_paid_invoices():
     invoice_queue = asyncio.Queue()
-    register_invoice_listener(invoice_queue, get_current_extension_name())
+    register_invoice_listener(invoice_queue, "ext_splitpayments")
 
     while True:
         payment = await invoice_queue.get()
@@ -58,12 +57,13 @@ async def on_invoice_paid(payment: Payment) -> None:
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
             else:
-                _, payment_request = await create_invoice(
+                payment = await create_invoice(
                     wallet_id=target.wallet,
                     amount=int(amount_msat / 1000),
                     internal=True,
                     memo=memo,
                 )
+                payment_request = payment.bolt11
 
             extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
 
@@ -73,6 +73,7 @@ async def on_invoice_paid(payment: Payment) -> None:
                     wallet_id=payment.wallet_id,
                     description=memo,
                     extra=extra,
+                    tag="splitpayments",
                 )
 
 

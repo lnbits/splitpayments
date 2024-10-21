@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -19,4 +19,4 @@ class TargetPut(BaseModel):
 
 
 class TargetPutList(BaseModel):
-    targets: List[TargetPut]
+    targets: list[TargetPut]
