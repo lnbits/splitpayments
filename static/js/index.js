@@ -16,6 +16,11 @@ function isTargetComplete(target) {
 window.app = Vue.createApp({
   el: '#vue',
   mixins: [windowMixin],
+  watch: {
+      selectedWallet() {
+          this.getTargets()
+      },
+  },
   data() {
     return {
       selectedWallet: null,
@@ -105,6 +110,5 @@ window.app = Vue.createApp({
   },
   created() {
     this.selectedWallet = this.g.user.wallets[0]
-    this.getTargets()
   }
 })
