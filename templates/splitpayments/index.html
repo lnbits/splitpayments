@@ -9,10 +9,9 @@
             filled
             dense
             :options="g.user.wallets"
-            :value="selectedWallet"
+            v-model="selectedWallet"
             label="Source Wallet:"
             option-label="name"
-            @input="changedWallet"
           >
           </q-select>
         </q-form>

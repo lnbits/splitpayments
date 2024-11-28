@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from lnbits.core.crud import get_wallet, get_wallet_for_key
 from lnbits.core.models import WalletTypeInfo
 from lnbits.decorators import require_admin_key
+from lnbits.helpers import urlsafe_short_hash
 from loguru import logger
 
 from .crud import get_targets, set_targets
@@ -53,6 +54,7 @@ async def api_targets_set(
 
             targets.append(
                 Target(
+                    id=urlsafe_short_hash(),
                     wallet=entry.wallet,
                     source=source_wallet.wallet.id,
                     percent=entry.percent,

@@ -1,19 +1,15 @@
-from sqlite3 import Row
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import Query
 from pydantic import BaseModel
 
 
 class Target(BaseModel):
+    id: str
     wallet: str
     source: str
     percent: float
-    alias: Optional[str]
-
-    @classmethod
-    def from_row(cls, row: Row):
-        return cls(**dict(row))
+    alias: Optional[str] = None
 
 
 class TargetPut(BaseModel):
@@ -23,4 +19,4 @@ class TargetPut(BaseModel):
 
 
 class TargetPutList(BaseModel):
-    targets: List[TargetPut]
+    targets: list[TargetPut]

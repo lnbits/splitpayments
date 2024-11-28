@@ -2,7 +2,7 @@
   "name": "Split Payments",
   "short_description": "Split incoming payments across wallets",
   "tile": "/splitpayments/static/image/split-payments.png",
-  "min_lnbits_version": "0.11.0",
+  "min_lnbits_version": "1.0.0",
   "contributors": [
     {
       "name": "cryptograffiti",

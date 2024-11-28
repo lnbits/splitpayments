@@ -8,7 +8,6 @@ import httpx
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.models import Payment
 from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
-from lnbits.helpers import get_current_extension_name
 from lnbits.tasks import register_invoice_listener
 from loguru import logger
 
@@ -17,8 +16,7 @@ from .crud import get_targets
 
 async def wait_for_paid_invoices():
     invoice_queue = asyncio.Queue()
-    register_invoice_listener(invoice_queue, get_current_extension_name())
-
+    register_invoice_listener(invoice_queue, "ext_splitpayments_invoice_listener")
     while True:
         payment = await invoice_queue.get()
         await on_invoice_paid(payment)
@@ -58,14 +56,15 @@ async def on_invoice_paid(payment: Payment) -> None:
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
             else:
-                _, payment_request = await create_invoice(
+                new_payment = await create_invoice(
                     wallet_id=target.wallet,
                     amount=int(amount_msat / 1000),
                     internal=True,
                     memo=memo,
                 )
+                payment_request = new_payment.bolt11
 
-            extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
+            extra = {**payment.extra, "splitted": True}
 
             if payment_request:
                 await pay_invoice(
@@ -90,7 +89,7 @@ async def get_lnurl_invoice(
             r = await client.get(
                 data["callback"],
                 params={"amount": rounded_amount, "comment": memo},
-                timeout=40,
+                timeout=5,
             )
             if r.is_error:
                 raise httpx.ConnectError("issue with scrub callback")
