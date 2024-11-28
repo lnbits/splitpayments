@@ -26,7 +26,7 @@ async def m002_float_percent(db: Connection):
     """
     await db.execute(
         """
-        ALTER TABLE splitpayments.targets 
+        ALTER TABLE splitpayments.targets
         ADD COLUMN percent REAL NOT NULL CHECK (percent >= 0 AND percent <= 100)
         """
     )

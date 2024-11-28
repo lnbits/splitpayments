@@ -17,9 +17,9 @@ window.app = Vue.createApp({
   el: '#vue',
   mixins: [windowMixin],
   watch: {
-      selectedWallet() {
-          this.getTargets()
-      },
+    selectedWallet() {
+      this.getTargets()
+    }
   },
   data() {
     return {
