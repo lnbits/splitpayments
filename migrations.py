@@ -22,14 +22,44 @@ async def m001_initial(db: Connection):
 
 async def m002_float_percent(db: Connection):
     """
-    Add float percent and migrates the existing data.
+    alter percent to be float.
     """
+    await db.execute("ALTER TABLE splitpayments.targets RENAME TO splitpayments_m001")
+
     await db.execute(
         """
-        ALTER TABLE splitpayments.targets
-        ADD COLUMN percent REAL NOT NULL CHECK (percent >= 0 AND percent <= 100)
-        """
+        CREATE TABLE splitpayments.targets (
+            wallet TEXT NOT NULL,
+            source TEXT NOT NULL,
+            percent REAL NOT NULL CHECK (percent >= 0 AND percent <= 100),
+            alias TEXT,
+
+            UNIQUE (source, wallet)
+        );
+    """
     )
+    result = await db.execute("SELECT * FROM splitpayments.splitpayments_m001")
+    rows = result.mappings().all()
+    for row in rows:
+        await db.execute(
+            """
+            INSERT INTO splitpayments.targets (
+                wallet,
+                source,
+                percent,
+                alias
+            )
+            VALUES (:wallet, :source, :percent, :alias)
+            """,
+            {
+                "wallet": row["wallet"],
+                "source": row["source"],
+                "percent": row["percent"],
+                "alias": row["alias"],
+            },
+        )
+
+    await db.execute("DROP TABLE splitpayments.splitpayments_m001")
 
 
 async def m003_add_id_and_tag(db: Connection):
