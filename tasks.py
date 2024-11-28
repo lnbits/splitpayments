@@ -56,15 +56,15 @@ async def on_invoice_paid(payment: Payment) -> None:
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
             else:
-                payment = await create_invoice(
+                new_payment = await create_invoice(
                     wallet_id=target.wallet,
                     amount=int(amount_msat / 1000),
                     internal=True,
                     memo=memo,
                 )
-                payment_request = payment.bolt11
+                payment_request = new_payment.bolt11
 
-            extra = {**payment.extra, "tag": "splitpayments", "splitted": True}
+            extra = {**payment.extra, "splitted": True}
 
             if payment_request:
                 await pay_invoice(
@@ -72,7 +72,6 @@ async def on_invoice_paid(payment: Payment) -> None:
                     wallet_id=payment.wallet_id,
                     description=memo,
                     extra=extra,
-                    tag="splitpayments",
                 )
 
 
@@ -90,7 +89,7 @@ async def get_lnurl_invoice(
             r = await client.get(
                 data["callback"],
                 params={"amount": rounded_amount, "comment": memo},
-                timeout=40,
+                timeout=5,
             )
             if r.is_error:
                 raise httpx.ConnectError("issue with scrub callback")
