@@ -6,6 +6,7 @@ from typing import Optional
 import bolt11
 import httpx
 from lnbits.core.crud import get_standalone_payment
+from lnbits.core.crud.wallets import get_wallet_for_key
 from lnbits.core.models import Payment
 from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
 from lnbits.tasks import register_invoice_listener
@@ -56,6 +57,9 @@ async def on_invoice_paid(payment: Payment) -> None:
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
             else:
+                wallet = await get_wallet_for_key(target.wallet)
+                if wallet is not None:
+                    target.wallet = wallet.id
                 new_payment = await create_invoice(
                     wallet_id=target.wallet,
                     amount=int(amount_msat / 1000),
