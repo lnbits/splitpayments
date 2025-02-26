@@ -69,12 +69,16 @@ async def on_invoice_paid(payment: Payment) -> None:
             extra = {**payment.extra, "splitted": True}
 
             if payment_request:
-                asyncio.create_task(pay_invoice_in_background(
-                    payment_request=payment_request,
-                    wallet_id=payment.wallet_id,
-                    description=memo,
-                    extra=extra
-                ))
+                task = asyncio.create_task(
+                    pay_invoice_in_background(
+                        payment_request=payment_request,
+                        wallet_id=payment.wallet_id,
+                        description=memo,
+                        extra=extra,
+                    )
+                )
+                task.add_done_callback(lambda fut: logger.success(fut.result()))
+
 
 async def pay_invoice_in_background(payment_request, wallet_id, description, extra):
     try:
@@ -84,6 +88,7 @@ async def pay_invoice_in_background(payment_request, wallet_id, description, ext
             description=description,
             extra=extra,
         )
+        return f"Splitpayments: paid invoice for {description}"
     except Exception as e:
         logger.error(f"Failed to pay invoice: {e}")
 
