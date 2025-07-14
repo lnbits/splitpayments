@@ -15,7 +15,7 @@
           keep-alive
           header-nav
         >
-          <q-step :name="1" title="Select Source Wallet" icon="account_balance_wallet" :done="currentStep > 1" class="q-mb-md">
+          <q-step :name="1" title="Select Source Wallet" icon="account_balance_wallet" :done="currentStep > 1">
           </q-step>
           <q-step :name="2" title="Add Targets" icon="share" :done="currentStep > 2">
           </q-step>
@@ -29,7 +29,7 @@
     <q-card v-show="currentStep === 1">
       <q-card-section>
         <div class="text-h5 text-weight-medium q-mb-md">Select Source Wallet</div>
-        <p class="text-body1 q-mb-lg text-grey-7">Choose the wallet from which Bitcoin Lightning payments will be split.</p>
+        <p class="text-body1 q-mb-lg text-grey-7">Choose the wallet from which payments will be split.</p>
 
         <q-form class="q-gutter-md">
           <div v-if="g.user.wallets.length === 0" class="text-center q-py-xl">
@@ -47,7 +47,6 @@
             v-model="selectedWallet"
             :options="g.user.wallets.map(w => ({label: w.name, value: w}))"
             color="primary"
-            class="q-gutter-x-none"
             type="radio"
           /> 
           
@@ -160,11 +159,12 @@
           </div>
           
           <div
-            class="row items-start q-mb-md"
-            style="gap: 16px; align-items: stretch;"
             v-for="(target, t) in targets"
             :key="t"
           >
+          <h6 class="q-my-sm">Split {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{ targets.length }}{% endraw %}</h6>
+
+          <div class="row items-start q-mb-md">
             <q-input
               outlined
               v-model.trim="target.alias"
@@ -245,19 +245,21 @@
                 val => (val * 10) % 1 === 0 || 'Maximum 1 decimal place allowed'
               ]"
             ></q-input>
-
+          </div>
+          <div style="margin-top: 16px;">
             <q-btn
               @click="clearTarget(t)"
-              round
-              color="negative"
               size="md"
               icon="close"
-              flat
+              color="negative"
+              text-color="white"
+              label="Remove"
               class="self-center"
             >
               <q-tooltip>Remove this split recipient</q-tooltip>
             </q-btn>
           </div>
+        </div>
           
           <div class="row q-mt-lg">
             <q-btn 
@@ -358,7 +360,7 @@
 
         <!-- Detailed Target List -->
         <div class="q-mb-lg">
-          <div class="text-h6 q-mb-md text-weight-medium">Split Configuration Details</div>
+          <div class="text-h6 q-mb-md text-weight-medium">Split Payment Summary</div>
           <q-list bordered separator class="rounded-borders">
             <q-item 
               v-for="(target, index) in targets" 
@@ -432,9 +434,8 @@
           </template>
           <div class="text-weight-medium">Important:</div>
           <div class="q-mt-xs">
-            • Splits totaling 100% may fail due to Lightning routing fees<br>
-            • Each payment to this wallet will be automatically split<br>
-            • Changes take effect immediately after activation
+            • Splits totaling 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
+            • Each payment to this wallet will be automatically split when it arrives
           </div>
         </q-banner>
 
@@ -559,6 +560,17 @@
 
 {% block styles %}
 <style>
+  .q-avatar {
+    width: 1.2em;
+    height: 1.2em;
+  }
+  .q-stepper__dot {
+    width: 42px;
+    height: 42px;
+  }
+  .q-stepper__content {
+    display: none;
+  }
 .flow-chart-container {
   display: flex;
   justify-content: center;

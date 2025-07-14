@@ -558,14 +558,6 @@ window.app = Vue.createApp({
         })
     },
     
-    setDefaultWallet() {
-      // If no wallet is selected and wallets are available
-      if (!this.selectedWallet && this.g.user.wallets && this.g.user.wallets.length > 0) {
-        // Check if any wallet has existing split payment configurations
-        this.checkExistingConfigurations()
-      }
-    },
-    
     async checkExistingConfigurations() {
       // Check each wallet for existing split payment configurations
       for (const wallet of this.g.user.wallets) {
@@ -592,12 +584,6 @@ window.app = Vue.createApp({
         this.selectedWallet = this.g.user.wallets[0]
       }
     }
-  },
-  created() {
-    // Set default wallet after ensuring data is available
-    this.$nextTick(() => {
-      this.setDefaultWallet()
-    })
   },
   mounted() {
     this.$nextTick(() => {
