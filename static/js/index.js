@@ -314,7 +314,7 @@ window.app = Vue.createApp({
             
             // End the line before the wallet icon (30px is wallet icon radius)
             const lineEndY = targetY - 45
-            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
+            this.drawFlowingLine(svg, sourceX, sourceY + 35, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
           }
         })
         
@@ -327,12 +327,12 @@ window.app = Vue.createApp({
             
             // End the line before the wallet icon (30px is wallet icon radius)
             const lineEndY = targetY - 45
-            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
+            this.drawFlowingLine(svg, sourceX, sourceY + 35, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
           }
         })
         
-        // Draw source wallet icon
-        this.drawWalletIcon(svg, sourceX, sourceY, 'source', this.remainingPercent)
+        // Draw source Bitcoin logo
+        this.drawBitcoinLogo(svg, sourceX, sourceY)
         
         // Draw bottom row wallet icons
         bottomRowItems.forEach((item, index) => {
@@ -610,6 +610,32 @@ window.app = Vue.createApp({
         
         svg.appendChild(percentText)
       }
+    },
+    
+    drawBitcoinLogo(svg, x, y) {
+      // Create Bitcoin logo using SVG
+      const logoGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      
+      const bitcoinPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      bitcoinPath.setAttribute('d', 'M39.0674606,19.3675957 L40.5054606,13.5995957 L36.9944606,12.7245957 L35.5944606,18.3405957 C34.6714606,18.1105957 33.7234606,17.8935957 32.7814606,17.6785957 L34.1914606,12.0255957 L30.6824606,11.1505957 L29.2434606,16.9165957 C28.4794606,16.7425957 27.7294606,16.5705957 27.0014606,16.3895957 L27.0054606,16.3715957 L22.1634606,15.1625957 L21.2294606,18.9125957 C21.2294606,18.9125957 23.8344606,19.5095957 23.7794606,19.5465957 C25.2014606,19.9015957 25.4584606,20.8425957 25.4154606,21.5885957 L23.7774606,28.1595957 L23.7714606,28.1845957 L21.4754606,37.3895957 C21.3014606,37.8215957 20.8604606,38.4695957 19.8664606,38.2235957 C19.9014606,38.2745957 17.3144606,37.5865957 17.3144606,37.5865957 L15.5714606,41.6055957 L20.1404606,42.7445957 C20.9904606,42.9575957 21.8234606,43.1805957 22.6434606,43.3905957 L21.1904606,49.2245957 L24.6974606,50.0995957 L26.1364606,44.3275957 C27.0944606,44.5875957 28.0244606,44.8275957 28.9344606,45.0535957 L27.5004606,50.7985957 L31.0114606,51.6735957 L32.4644606,45.8505957 C38.4514606,46.9835957 42.9534606,46.5265957 44.8484606,41.1115957 C46.3754606,36.7515957 44.7724606,34.2365957 41.6224606,32.5965957 C43.9164606,32.0675957 45.6444606,30.5585957 46.1054606,27.4415957 C46.7424606,23.1835957 43.5004606,20.8945957 39.0674606,19.3675957 Z M38.0834606,38.6905957 C36.9984606,43.0505957 29.6574606,40.6935957 27.2774606,40.1025957 L29.2054606,32.3735957 C31.5854606,32.9675957 39.2174606,34.1435957 38.0834606,38.6905957 Z M39.1694606,27.3785957 C38.1794606,31.3445957 32.0694606,29.3295957 30.0874606,28.8355957 L31.8354606,21.8255957 C33.8174606,22.3195957 40.2004606,23.2415957 39.1694606,27.3785957 Z')
+      bitcoinPath.setAttribute('fill', '#f7931a') // Orange color for Bitcoin
+      bitcoinPath.setAttribute('transform', `translate(${x - 45}, ${y - 50}) scale(1.4)`) // Scale and position the logo
+      
+      logoGroup.appendChild(bitcoinPath)
+      svg.appendChild(logoGroup)
+      
+      // Add "Incoming Payment" text above the Bitcoin logo
+      const incomingText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      incomingText.setAttribute('x', x)
+      incomingText.setAttribute('y', y - 50)
+      incomingText.setAttribute('text-anchor', 'middle')
+      incomingText.setAttribute('fill', '#f7931a')
+      incomingText.setAttribute('font-family', 'Arial, sans-serif')
+      incomingText.setAttribute('font-size', '16px')
+      incomingText.setAttribute('font-weight', 'bold')
+      incomingText.textContent = 'Incoming Payment'
+      
+      svg.appendChild(incomingText)
     },
     
     addPercentageLabel(svg, x, y, percentage, color) {

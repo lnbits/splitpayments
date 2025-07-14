@@ -179,7 +179,7 @@
           </div>
         </q-banner>
 
-        <q-form class="q-gutter-md">
+        <q-form>
           <div
             v-for="(target, t) in targets"
             :key="t"
@@ -192,12 +192,13 @@
               <span class="split-header-text">Split Recipient {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{ targets.length }}{% endraw %}</span>
               <q-btn
                 @click="clearTarget(t)"
-                size="sm"
+                size="md"
                 icon="close"
-                color="grey-6"
-                flat
-                round
+                color="red"
+                text-color="white"
+                negative
                 class="remove-btn"
+                label="Remove this recipient"
               >
                 <q-tooltip>Remove this recipient</q-tooltip>
               </q-btn>
@@ -356,7 +357,7 @@
 
         <!-- Detailed Target List -->
         <div class="detailed-targets-container q-mb-lg">
-          <div class="section-title q-mb-md">Split Payment Summary</div>
+          <div class="text-h6 q-mb-md text-weight-medium">Split Payment Summary</div>
           <div class="targets-list">
             <div 
               v-for="(target, index) in targets" 
@@ -423,8 +424,9 @@
           </template>
           <div class="text-weight-medium">Important:</div>
           <div class="q-mt-xs">
-            • Splits totaling 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
-            • Each payment to this wallet will be automatically split when it arrives
+            <p>• Splits totaling 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
+              <br>
+            • Each payment to this wallet will be automatically split when it arrives</p>
           </div>
         </q-banner>
 
@@ -855,7 +857,6 @@
 .summary-card-title,
 .summary-card-main-text,
 .summary-card-sub-text,
-.section-title,
 .target-name,
 .target-wallet {
   font-family: Roboto, "-apple-system", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -911,13 +912,6 @@
 
 .detailed-targets-container {
   margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 16px;
 }
 
 .targets-list {
@@ -1008,11 +1002,6 @@
 
   .summary-card-sub-text {
     font-size: 0.75rem;
-  }
-
-  .section-title {
-    font-size: 1rem;
-    margin-bottom: 12px;
   }
 
   .targets-list {
