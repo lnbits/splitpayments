@@ -338,11 +338,11 @@ window.app = Vue.createApp({
         // Add percentage text below name
         const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
         percentText.setAttribute('x', x)
-        percentText.setAttribute('y', y + 65)
+        percentText.setAttribute('y', y + 80)
         percentText.setAttribute('text-anchor', 'middle')
         percentText.setAttribute('fill', '#f59e0b')
         percentText.setAttribute('font-family', 'Arial, sans-serif')
-        percentText.setAttribute('font-size', '16px')
+        percentText.setAttribute('font-size', '32px')
         percentText.setAttribute('font-weight', 'bold')
         percentText.textContent = `${percentage}%`
         

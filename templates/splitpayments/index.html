@@ -86,20 +86,20 @@
     <q-card v-show="currentStep === 2" class="q-pa-md">
       <q-card-section>
         <div class="text-h5 text-weight-medium q-mb-md">Add Targets</div>
-        <p class="text-body1 q-mb-lg text-grey-7">Specify the target Lightning wallets and percentage splits.</p>
+        <p class="text-body1 q-mb-lg text-grey-7">Specify the recipients of the split payments and the percentage of the payment that each recipient will receive.</p>
         
         <!-- Live Percentage Badge -->
         <div class="row items-center q-mb-md">
-          <div class="row items-center q-gutter-md q-mb-md">
+          <div class="items-center q-gutter-md q-mb-md">
             <q-badge 
               :color="showPercentError ? 'negative' : showPercentWarning ? 'warning' : 'positive'"
               class="text-weight-bold q-pa-sm text-body1"
               size="lg"
             >
-              Total: {% raw %}{{ totalPercent }}%{% endraw %}
+              Split payments total: {% raw %}{{ totalPercent }}%{% endraw %}
             </q-badge>
             <div class="text-body1 text-weight-medium">
-              Remaining in source wallet: <span class="text-primary text-weight-bold">{% raw %}{{ remainingPercent }}%{% endraw %}</span>
+              <span class="text-primary text-weight-bold">{% raw %}{{ remainingPercent }}%{% endraw %}</span> of each payment will remain in the source wallet.
             </div>
           </div>
         </div>
@@ -170,7 +170,7 @@
               v-model.trim="target.alias"
               label="Split Name *"
               hint="A name to identify this split recipient"
-              class="q-mr-md"
+              class="q-mr-md q-mb-md"
               style="min-width: 180px; max-width: 200px;"
               :error="target.alias && target.alias.trim() === ''"
               error-message="Split name is required"
