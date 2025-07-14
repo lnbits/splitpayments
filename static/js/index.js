@@ -350,27 +350,93 @@ window.app = Vue.createApp({
         console.error('Error creating flow chart:', error)
       }
     },
-    drawFlowingLine(svg, x1, y1, x2, y2, thickness, color) {
-      // Create a smooth flowing path like in your reference
+    drawFlowingLine(svg, x1, y1, x2, y2, finalThickness, color) {
+      // Create a tapered line that starts at 10px and increases to finalThickness
+      const startThickness = 10
+      const segments = 20 // Number of segments for smooth taper
       const midY = y1 + (y2 - y1) * 0.6
       
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      // Generate points along the quadratic Bezier curve
+      const points = []
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments
+        let x, y
+        
+        if (t <= 0.5) {
+          // First quadratic curve: (x1, y1) to ((x1+x2)/2, midY)
+          const localT = t * 2
+          const p0 = {x: x1, y: y1}
+          const p1 = {x: x1, y: midY}
+          const p2 = {x: (x1 + x2) / 2, y: midY}
+          
+          x = (1 - localT) * (1 - localT) * p0.x + 2 * (1 - localT) * localT * p1.x + localT * localT * p2.x
+          y = (1 - localT) * (1 - localT) * p0.y + 2 * (1 - localT) * localT * p1.y + localT * localT * p2.y
+        } else {
+          // Second quadratic curve: ((x1+x2)/2, midY) to (x2, y2)
+          const localT = (t - 0.5) * 2
+          const p0 = {x: (x1 + x2) / 2, y: midY}
+          const p1 = {x: x2, y: midY}
+          const p2 = {x: x2, y: y2}
+          
+          x = (1 - localT) * (1 - localT) * p0.x + 2 * (1 - localT) * localT * p1.x + localT * localT * p2.x
+          y = (1 - localT) * (1 - localT) * p0.y + 2 * (1 - localT) * localT * p1.y + localT * localT * p2.y
+        }
+        
+        // Calculate thickness at this point
+        const thickness = startThickness + (finalThickness - startThickness) * t
+        points.push({x, y, thickness})
+      }
       
-      // Create the flowing S-curve path
-      const pathData = `
-        M ${x1} ${y1}
-        Q ${x1} ${midY} ${(x1 + x2) / 2} ${midY}
-        Q ${x2} ${midY} ${x2} ${y2}
-      `
+      // Create polygon points for the tapered line
+      const leftPoints = []
+      const rightPoints = []
       
-      path.setAttribute('d', pathData.trim())
-      path.setAttribute('stroke', color)
-      path.setAttribute('stroke-width', thickness)
-      path.setAttribute('stroke-linecap', 'butt')
-      path.setAttribute('fill', 'none')
-      path.setAttribute('opacity', '1')
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i]
+        const halfThickness = point.thickness / 2
+        
+        // Calculate direction vector
+        let dx = 0, dy = 1
+        if (i < points.length - 1) {
+          dx = points[i + 1].x - point.x
+          dy = points[i + 1].y - point.y
+        } else if (i > 0) {
+          dx = point.x - points[i - 1].x
+          dy = point.y - points[i - 1].y
+        }
+        
+        // Normalize direction vector
+        const length = Math.sqrt(dx * dx + dy * dy)
+        if (length > 0) {
+          dx /= length
+          dy /= length
+        }
+        
+        // Calculate perpendicular offset (rotate 90 degrees)
+        const perpX = -dy
+        const perpY = dx
+        
+        // Add points to left and right sides
+        leftPoints.push({
+          x: point.x + perpX * halfThickness,
+          y: point.y + perpY * halfThickness
+        })
+        rightPoints.unshift({
+          x: point.x - perpX * halfThickness,
+          y: point.y - perpY * halfThickness
+        })
+      }
       
-      svg.appendChild(path)
+      // Create polygon
+      const allPoints = [...leftPoints, ...rightPoints]
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      const pointsString = allPoints.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
+      
+      polygon.setAttribute('points', pointsString)
+      polygon.setAttribute('fill', color)
+      polygon.setAttribute('opacity', '1')
+      
+      svg.appendChild(polygon)
     },
     
     drawWalletIcon(svg, x, y, type, percentage, targetName = null) {
