@@ -68,14 +68,28 @@ window.app = Vue.createApp({
         target.wallet && target.wallet.trim() !== '' && 
         target.percent > 0 && target.percent <= 100 &&
         target.alias && target.alias.trim() !== '' && target.alias.trim().length <= 50
-      )
+      ) && !this.hasDuplicateRecipients && !this.hasDuplicateNames
     },
     hasValidationErrors() {
       return this.targets.some(target => 
         !target.wallet || target.wallet.trim() === '' ||
         !target.alias || target.alias.trim() === '' ||
         target.percent <= 0 || target.percent > 100
-      )
+      ) || this.hasDuplicateRecipients || this.hasDuplicateNames
+    },
+    hasDuplicateRecipients() {
+      const walletAddresses = this.targets
+        .filter(target => target.wallet && target.wallet.trim() !== '')
+        .map(target => target.wallet.trim().toLowerCase())
+      
+      return walletAddresses.length !== new Set(walletAddresses).size
+    },
+    hasDuplicateNames() {
+      const splitNames = this.targets
+        .filter(target => target.alias && target.alias.trim() !== '')
+        .map(target => target.alias.trim().toLowerCase())
+      
+      return splitNames.length !== new Set(splitNames).size
     },
     validationSummary() {
       const errors = []
@@ -85,7 +99,13 @@ window.app = Vue.createApp({
       if (this.totalPercent > 100) {
         errors.push(`Total percentage (${this.totalPercent}%) exceeds 100%`)
       }
-      if (this.hasValidationErrors) {
+      if (this.hasDuplicateRecipients) {
+        errors.push('Duplicate recipient addresses found - each recipient must be unique')
+      }
+      if (this.hasDuplicateNames) {
+        errors.push('Duplicate split names found - each split name must be unique')
+      }
+      if (this.hasValidationErrors && !this.hasDuplicateRecipients && !this.hasDuplicateNames) {
         errors.push('Some fields have validation errors')
       }
       return errors
@@ -148,6 +168,24 @@ window.app = Vue.createApp({
       if (step >= 1 && step <= this.maxSteps) {
         this.currentStep = step
       }
+    },
+    
+    // Validation helper methods
+    isDuplicateRecipient(index) {
+      const currentWallet = this.targets[index]?.wallet?.trim().toLowerCase()
+      if (!currentWallet) return false
+      
+      return this.targets.some((target, i) => 
+        i !== index && target.wallet?.trim().toLowerCase() === currentWallet
+      )
+    },
+    isDuplicateName(index) {
+      const currentName = this.targets[index]?.alias?.trim().toLowerCase()
+      if (!currentName) return false
+      
+      return this.targets.some((target, i) => 
+        i !== index && target.alias?.trim().toLowerCase() === currentName
+      )
     },
     
     // SVG Flow Chart methods
@@ -244,7 +282,7 @@ window.app = Vue.createApp({
           // Add percentage label - center it on the curved line
           const labelX = (sourceX + targetPos.x) / 2
           const labelY = sourceY + 40 + ((targetY - 40) - (sourceY + 40)) * 0.6 // Position at the curve peak
-          this.addPercentageLabel(svg, labelX, labelY, `${target.percent}%`, target.color || '#4ade80')
+          // this.addPercentageLabel(svg, labelX, labelY, `${target.percent}%`, target.color || '#4ade80')
         })
         
         // Draw source wallet icon

@@ -147,6 +147,21 @@
           </div>
         </q-banner>
 
+        <q-banner 
+          v-if="hasDuplicateRecipients || hasDuplicateNames"
+          class="bg-negative text-white q-mb-md" 
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="error" />
+          </template>
+          <div class="text-weight-medium">Duplicate values found</div>
+          <div class="q-mt-xs">
+            <div v-if="hasDuplicateRecipients">• Each recipient address must be unique</div>
+            <div v-if="hasDuplicateNames">• Each split name must be unique</div>
+          </div>
+        </q-banner>
+
         <q-form class="q-gutter-md">
           <div v-if="targets.length === 0" class="text-center q-py-xl">
             <q-icon name="add_circle_outline" size="64px" color="grey-5" />
@@ -172,11 +187,12 @@
               hint="A name to identify this split recipient"
               class="q-mr-md q-mb-md"
               style="min-width: 180px; max-width: 200px;"
-              :error="target.alias && target.alias.trim() === ''"
-              error-message="Split name is required"
+              :error="(target.alias && target.alias.trim() === '') || isDuplicateName(t)"
+              :error-message="isDuplicateName(t) ? 'This split name is already used' : 'Split name is required'"
               :rules="[
                 val => (val && val.trim().length > 0) || 'Split name is required',
-                val => (val && val.trim().length <= 50) || 'Split name must be 50 characters or less'
+                val => (val && val.trim().length <= 50) || 'Split name must be 50 characters or less',
+                val => !isDuplicateName(t) || 'This split name is already used'
               ]"
             ></q-input>
             <div class="column q-mt-none">
@@ -204,11 +220,12 @@
               hint="Lightning Address, LNbits wallet ID, or LNURLp string"
               class="q-mr-md"
               style="min-width: 300px; flex: 1;"
-              :error="target.wallet && target.wallet.trim() === ''"
-              error-message="Recipient address is required"
+              :error="(target.wallet && target.wallet.trim() === '') || isDuplicateRecipient(t)"
+              :error-message="isDuplicateRecipient(t) ? 'This recipient address is already used' : 'Recipient address is required'"
               :rules="[
                 val => (val && val.trim().length > 0) || 'Recipient address is required',
-                val => !val || val.includes('@') || val.includes('lnurl') || val.length >= 20 || 'Please enter a valid Lightning address, LNbits wallet ID, or LNURLp string'
+                val => !val || val.includes('@') || val.includes('lnurl') || val.length >= 20 || 'Please enter a valid Lightning address, LNbits wallet ID, or LNURLp string',
+                val => !isDuplicateRecipient(t) || 'This recipient address is already used'
               ]"
             ></q-input>
             <q-select
