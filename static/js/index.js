@@ -284,7 +284,7 @@ window.app = Vue.createApp({
             name: this.selectedWallet ? this.selectedWallet.name : 'Source',
             percent: this.remainingPercent,
             type: 'source_remaining',
-            color: '#1976d2'
+            color: '#96A6FF'
           })
         }
         
@@ -308,18 +308,27 @@ window.app = Vue.createApp({
         const maxPercent = Math.max(...bottomRowItems.map(t => t.percent))
         const maxThickness = 30 // Maximum line thickness in pixels
         
-        // Draw flowing lines to all bottom row items
+        // Draw flowing lines - source_remaining lines first (behind other lines)
+        // First pass: draw source_remaining lines
         bottomRowItems.forEach((item, index) => {
-          const itemPos = bottomRowPositions[index]
-          // Calculate thickness proportional to the highest percentage
-          const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
-          
-          this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
-          
-          // Add percentage label - center it on the curved line
-          const labelX = (sourceX + itemPos.x) / 2
-          const labelY = sourceY + 40 + ((targetY - 40) - (sourceY + 40)) * 0.6 // Position at the curve peak
-          // this.addPercentageLabel(svg, labelX, labelY, `${item.percent}%`, item.color || '#4ade80')
+          if (item.type === 'source_remaining') {
+            const itemPos = bottomRowPositions[index]
+            // Calculate thickness proportional to the highest percentage
+            const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
+            
+            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
+          }
+        })
+        
+        // Second pass: draw target lines (on top of source_remaining lines)
+        bottomRowItems.forEach((item, index) => {
+          if (item.type === 'target') {
+            const itemPos = bottomRowPositions[index]
+            // Calculate thickness proportional to the highest percentage
+            const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
+            
+            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
+          }
         })
         
         // Draw source wallet icon
@@ -421,7 +430,7 @@ window.app = Vue.createApp({
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#374151')
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -435,7 +444,7 @@ window.app = Vue.createApp({
         percentText.setAttribute('x', x)
         percentText.setAttribute('y', y + 80)
         percentText.setAttribute('text-anchor', 'middle')
-        percentText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#f59e0b')
+        percentText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#f59e0b')
         percentText.setAttribute('font-family', 'Arial, sans-serif')
         percentText.setAttribute('font-size', '32px')
         percentText.setAttribute('font-weight', 'bold')
@@ -453,7 +462,7 @@ window.app = Vue.createApp({
       rect.setAttribute('width', 60)
       rect.setAttribute('height', 60)
       rect.setAttribute('rx', 12)
-      rect.setAttribute('fill', (type === 'source' || type === 'source_remaining') ? '#6366f1' : '#f59e0b')
+      rect.setAttribute('fill', (type === 'source' || type === 'source_remaining') ? (type === 'source_remaining' ? '#96A6FF' : '#6366f1') : '#f59e0b')
       rect.setAttribute('stroke', '#1f2937')
       rect.setAttribute('stroke-width', 2)
       
@@ -496,7 +505,7 @@ window.app = Vue.createApp({
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#374151')
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -510,7 +519,7 @@ window.app = Vue.createApp({
         percentText.setAttribute('x', x)
         percentText.setAttribute('y', y + 65)
         percentText.setAttribute('text-anchor', 'middle')
-        percentText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#f59e0b')
+        percentText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#f59e0b')
         percentText.setAttribute('font-family', 'Arial, sans-serif')
         percentText.setAttribute('font-size', '16px')
         percentText.setAttribute('font-weight', 'bold')
