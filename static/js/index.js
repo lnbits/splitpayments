@@ -427,8 +427,26 @@ window.app = Vue.createApp({
         })
       }
       
-      // Create polygon
-      const allPoints = [...leftPoints, ...rightPoints]
+      // Create arrow tip pointing down
+      const lastPoint = points[points.length - 1]
+      const arrowHeight = finalThickness * 0.8 // Arrow height proportional to final thickness
+      
+      // Get the last left and right points to connect seamlessly
+      const lastLeftPoint = leftPoints[leftPoints.length - 1]
+      const lastRightPoint = rightPoints[0] // rightPoints is reversed, so first element is the last point
+      
+      // Arrow tip points - connect directly to the line ends
+      const arrowTip = {x: lastPoint.x, y: lastPoint.y + arrowHeight}
+      
+      // Create combined polygon including line body and arrow
+      const allPoints = [
+        ...leftPoints.slice(0, -1), // All left points except the last one
+        lastLeftPoint, // Last left point
+        arrowTip, // Arrow tip
+        lastRightPoint, // Last right point  
+        ...rightPoints.slice(1) // All right points except the first one
+      ]
+      
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
       const pointsString = allPoints.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
       
