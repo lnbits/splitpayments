@@ -154,20 +154,45 @@ window.app = Vue.createApp({
       if (this.currentStep < this.maxSteps) {
         if (this.currentStep === 1 && this.canProceedFromStep1) {
           this.currentStep++
+          this.scrollToTop()
         } else if (this.currentStep === 2 && this.canProceedFromStep2) {
           this.currentStep++
+          this.scrollToTop()
         }
       }
     },
     prevStep() {
       if (this.currentStep > 1) {
         this.currentStep--
+        this.scrollToTop()
       }
     },
     goToStep(step) {
       if (step >= 1 && step <= this.maxSteps) {
         this.currentStep = step
+        this.scrollToTop()
       }
+    },
+    
+    // Scroll to top of wizard
+    scrollToTop() {
+      this.$nextTick(() => {
+        // Find the wizard container (the stepper card)
+        const wizardElement = document.querySelector('.q-stepper') || document.querySelector('.q-card')
+        if (wizardElement) {
+          wizardElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest' 
+          })
+        } else {
+          // Fallback to window scroll
+          window.scrollTo({ 
+            top: 0, 
+            behavior: 'smooth' 
+          })
+        }
+      })
     },
     
     // Validation helper methods
@@ -532,6 +557,7 @@ window.app = Vue.createApp({
           icon: 'error'
         })
         this.currentStep = 1
+        this.scrollToTop()
         return
       }
 
@@ -562,6 +588,7 @@ window.app = Vue.createApp({
           this.currentHash = hashTargets(this.targets)
           // Reset to step 1 after successful save
           this.currentStep = 1
+          this.scrollToTop()
         })
         .catch(err => {
           LNbits.utils.notifyApiError(err)
