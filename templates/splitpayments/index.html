@@ -310,79 +310,72 @@
     </q-card>
 
     <!-- Step 3: Review & Confirm -->
-    <q-card v-show="currentStep === 3" class="q-pa-md">
-      <q-card-section>
-        <div class="text-h5 text-weight-medium q-mb-md">Review & Confirm</div>
-        <p class="text-body1 q-mb-lg text-grey-7">Review your split payment configuration and activate when ready.</p>
+    <q-card v-show="currentStep === 3" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">Review & Confirm</div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">Review your split payment configuration and activate when ready.</p>
         
         <!-- Configuration Summary Cards -->
-        <div class="row q-gutter-md q-mb-lg">
+        <div class="summary-cards-container q-mb-lg">
           <!-- Source Wallet Card -->
-          <div class="col-12 col-md-5">
-            <q-card flat bordered class="bg-blue-1">
-              <q-card-section class="q-pa-md">
-                <div class="row items-center q-mb-sm text-primary">
-                  <p><q-icon name="account_balance_wallet" size="sm" class="q-mr-sm" /></p>
-                  <p class="text-subtitle2 text-weight-medium">Source Wallet</p>
-                </div>
-                <div class="text-h6 text-primary q-mb-xs text-weight-bold">
+          <q-card flat bordered class="bg-blue-1 summary-card">
+            <q-card-section class="summary-card-section">
+              <div class="summary-card-header">
+                <q-icon name="account_balance_wallet" size="md" class="q-mr-sm" />
+                <span class="summary-card-title">Source Wallet</span>
+              </div>
+              <div class="summary-card-content">
+                <div class="summary-card-main-text">
                   {% raw %}{{ selectedWallet ? selectedWallet.name : 'None selected' }}{% endraw %}
                 </div>
-                <div class="text-body2 text-grey-7">
+                <div class="summary-card-sub-text">
                   Keeps {% raw %}{{ remainingPercent }}%{% endraw %} of payments
                 </div>
-              </q-card-section>
-            </q-card>
-          </div>
+              </div>
+            </q-card-section>
+          </q-card>
 
           <!-- Splits Summary Card -->
-          <div class="col-12 col-md-6">
-            <q-card flat bordered class="bg-green-1">
-              <q-card-section class="q-pa-md">
-                <div class="row items-center q-mb-sm text-positive">
-                  <p><q-icon name="share" size="sm" class="q-mr-sm" /></p>
-                  <p>Split Targets</p>
-                </div>
-                <div class="text-h6 text-positive q-mb-xs">
+          <q-card flat bordered class="bg-green-1 summary-card">
+            <q-card-section class="summary-card-section">
+              <div class="summary-card-header">
+                <q-icon name="share" size="md" class="q-mr-sm" />
+                <span class="summary-card-title">Split Targets</span>
+              </div>
+              <div class="summary-card-content">
+                <div class="summary-card-main-text">
                   {% raw %}{{ targets.length }}{% endraw %} recipient{% raw %}{{ targets.length !== 1 ? 's' : '' }}{% endraw %}
                 </div>
-                <div class="text-body2 text-grey-7">
+                <div class="summary-card-sub-text">
                   Total {% raw %}{{ totalPercent }}%{% endraw %} of payments split
                 </div>
-              </q-card-section>
-            </q-card>
-          </div>
+              </div>
+            </q-card-section>
+          </q-card>
         </div>
 
         <!-- Detailed Target List -->
-        <div class="q-mb-lg">
-          <div class="text-h6 q-mb-md text-weight-medium">Split Payment Summary</div>
-          <q-list bordered separator class="rounded-borders">
-            <q-item 
+        <div class="detailed-targets-container q-mb-lg">
+          <div class="section-title q-mb-md">Split Payment Summary</div>
+          <div class="targets-list">
+            <div 
               v-for="(target, index) in targets" 
               :key="index"
-              class="q-py-lg"
+              class="target-summary-item"
             >
-              <q-item-section avatar>
-                <q-avatar 
-                  size="96px"
-                  color="positive" 
-                  text-color="white"
-                  class="text-weight-bold"
-                >
-                  {% raw %}{{ target.percent }}%{% endraw %}
-                </q-avatar>
-              </q-item-section>
-              <q-item-section class="q-ml-md">
-                <q-item-label class="text-h6 text-weight-bold q-mb-xs">
+              <div class="target-percent-circle">
+                {% raw %}{{ target.percent }}%{% endraw %}
+              </div>
+              <div class="target-info">
+                <div class="target-name">
                   {% raw %}{{ target.alias }}{% endraw %}
-                </q-item-label>
-                <q-item-label caption class="text-body1 text-grey-6">
+                </div>
+                <div class="target-wallet">
                   {% raw %}{{ target.wallet }}{% endraw %}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Split Flow Visualization -->
@@ -436,36 +429,32 @@
         </q-banner>
 
         <!-- Action Buttons -->
-        <div class="row justify-between items-center q-mt-xl">
-          
-          <div class="row q-gutter-md">
-
-            <q-btn
+        <div class="step-navigation step-3-navigation q-mt-xl">
+          <q-btn
             unelevated
             color="grey-7"
             text-color="white"
             @click="prevStep()"
-            size="md"
-            class="text-weight-medium q-px-lg"
+            size="lg"
+            class="text-weight-medium back-button"
             no-caps
             icon="arrow_back"
             label="Back to Edit"
           >
           </q-btn>
 
-            <q-btn
-              unelevated
-              :color="validationSummary.length === 0 ? 'positive' : 'grey-5'"
-              @click="saveTargets()"
-              :disabled="validationSummary.length > 0"
-              size="md"
-              class="text-weight-bold q-px-xl"
-              no-caps
-              icon="check_circle"
-            >
-              {% raw %}{{ validationSummary.length === 0 ? 'Confirm and Activate' : 'Fix Issues to Activate' }}{% endraw %}
-            </q-btn>
-          </div>
+          <q-btn
+            unelevated
+            :color="validationSummary.length === 0 ? 'positive' : 'grey-5'"
+            @click="saveTargets()"
+            :disabled="validationSummary.length > 0"
+            size="lg"
+            class="text-weight-bold confirm-button"
+            no-caps
+            icon="check_circle"
+          >
+            {% raw %}{{ validationSummary.length === 0 ? 'Confirm and Activate' : 'Fix Issues to Activate' }}{% endraw %}
+          </q-btn>
         </div>
       </q-card-section>
     </q-card>
@@ -852,6 +841,237 @@
 
   .items-center.q-gutter-md .q-badge {
     align-self: flex-start;
+  }
+}
+
+/* Step 3 Mobile Improvements */
+.summary-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Ensure consistent font family for all Step 3 elements */
+.summary-card-title,
+.summary-card-main-text,
+.summary-card-sub-text,
+.section-title,
+.target-name,
+.target-wallet {
+  font-family: Roboto, "-apple-system", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.summary-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.summary-card-section {
+  padding: 16px;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #1976d2;
+}
+
+.summary-card-title {
+  margin-left: 10px;
+  margin-top: -5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.summary-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-card-main-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.summary-card-sub-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.bg-green-1 .summary-card-header {
+  color: #059669;
+}
+
+.bg-green-1 .summary-card-main-text {
+  color: #059669;
+}
+
+.detailed-targets-container {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.targets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.target-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.target-percent-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #059669;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.target-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.target-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.target-wallet {
+  font-size: 0.875rem;
+  color: #6b7280;
+  word-break: break-all;
+}
+
+.step-3-navigation {
+  justify-content: center;
+  gap: 16px;
+}
+
+.confirm-button {
+  background: #059669 !important;
+  color: white !important;
+}
+
+.confirm-button:disabled {
+  background: #9ca3af !important;
+}
+
+/* Mobile-specific styles for Step 3 */
+@media (max-width: 768px) {
+  .summary-cards-container {
+    gap: 12px;
+  }
+
+  .summary-card-section {
+    padding: 12px;
+  }
+
+  .summary-card-header {
+    margin-bottom: 8px;
+  }
+
+  .summary-card-title {
+    font-size: 0.875rem;
+    line-height: 1.2;
+  }
+
+  .summary-card-main-text {
+    font-size: 1rem;
+  }
+
+  .summary-card-sub-text {
+    font-size: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .targets-list {
+    gap: 8px;
+  }
+
+  .target-summary-item {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .target-percent-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 0.875rem;
+  }
+
+  .target-name {
+    font-size: 0.875rem;
+  }
+
+  .target-wallet {
+    font-size: 0.75rem;
+  }
+
+  .step-3-navigation {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .back-button {
+    width: 100%;
+    min-height: 52px;
+    order: 2;
+  }
+
+  .confirm-button {
+    width: 100%;
+    min-height: 56px;
+    order: 1;
+    font-size: 1rem;
+  }
+
+  /* Flow chart container mobile optimization */
+  .flow-chart-container {
+    margin: 12px 0;
+    padding: 12px;
+    min-height: 300px;
+  }
+
+  /* Status banners mobile optimization */
+  .q-banner {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .q-banner .q-banner__content {
+    font-size: 0.875rem;
+    line-height: 1.4;
   }
 }
 </style>
