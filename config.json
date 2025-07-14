@@ -39,6 +39,11 @@
       "name": "arcbtc",
       "uri": "https://github.com/arcbtc",
       "role": "Developer"
+    },
+    {
+      "name": "blackcoffee",
+      "uri": "https://github.com/blackcoffeexbt",
+      "role": "Developer"
     }
   ],
   "images": [

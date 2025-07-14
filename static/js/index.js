@@ -428,7 +428,7 @@ window.app = Vue.createApp({
       
       // Create arrow tip pointing down
       const lastPoint = points[points.length - 1]
-      const arrowHeight = finalThickness * 0.8 // Arrow height proportional to final thickness
+      const arrowHeight = 15 // Fixed arrow height so all arrows terminate at same Y position
       
       // Get the last left and right points to connect seamlessly
       const lastLeftPoint = leftPoints[leftPoints.length - 1]
