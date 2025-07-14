@@ -100,10 +100,10 @@
     </q-card>
 
     <!-- Step 2: Add Targets -->
-    <q-card v-show="currentStep === 2" class="q-pa-md">
-      <q-card-section>
-        <div class="text-h5 text-weight-medium q-mb-md">Add Targets</div>
-        <p class="text-body1 q-mb-lg text-grey-7">Specify the recipients of the split payments and the percentage of the payment that each recipient will receive.</p>
+    <q-card v-show="currentStep === 2" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">Add Targets</div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">Specify the recipients of the split payments and the percentage of the payment that each recipient will receive.</p>
         
         <!-- Live Percentage Badge -->
         <div class="row items-center q-mb-md">
@@ -183,116 +183,87 @@
           <div
             v-for="(target, t) in targets"
             :key="t"
+            class="split-recipient-container q-mb-lg"
           >
-          <h6 class="q-my-sm">Split {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{ targets.length }}{% endraw %}</h6>
-
-          <div class="row items-start q-mb-md">
-            <q-input
-              outlined
-              v-model.trim="target.alias"
-              label="Split Name *"
-              hint="A name to identify this split recipient"
-              class="q-mr-md q-mb-md"
-              style="min-width: 180px; max-width: 200px;"
-              :error="(target.alias && target.alias.trim() === '') || isDuplicateName(t)"
-              :error-message="isDuplicateName(t) ? 'This split name is already used' : 'Split name is required'"
-              :rules="[
-                val => (val && val.trim().length > 0) || 'Split name is required',
-                val => (val && val.trim().length <= 50) || 'Split name must be 50 characters or less',
-                val => !isDuplicateName(t) || 'This split name is already used'
-              ]"
-            ></q-input>
-            <div class="column q-mt-none">
-              <div class="col">
-                <q-radio
-                  class="float-left"
-                  v-model="target.targetChoice"
-                  val="wallet"
-                  label="wallet"
-                ></q-radio>
+            <div class="split-recipient-header q-mb-md">
+              <div class="split-number-circle">
+                {% raw %}{{ t + 1 }}{% endraw %}
               </div>
-              <div class="col">
-                <q-radio
-                  class="float-left"
-                  v-model="target.targetChoice"
-                  val="lnurl"
-                  label="lnurl"
-                ></q-radio>
-              </div>
+              <span class="split-header-text">Split Recipient {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{ targets.length }}{% endraw %}</span>
+              <q-btn
+                @click="clearTarget(t)"
+                size="sm"
+                icon="close"
+                color="grey-6"
+                flat
+                round
+                class="remove-btn"
+              >
+                <q-tooltip>Remove this recipient</q-tooltip>
+              </q-btn>
             </div>
-            <q-input
-              outlined
-              v-model.trim="target.wallet"
-              label="Split Recipient *"
-              hint="Lightning Address, LNbits wallet ID, or LNURLp string"
-              class="q-mr-md"
-              style="min-width: 300px; flex: 1;"
-              :error="(target.wallet && target.wallet.trim() === '') || isDuplicateRecipient(t)"
-              :error-message="isDuplicateRecipient(t) ? 'This recipient address is already used' : 'Recipient address is required'"
-              :rules="[
-                val => (val && val.trim().length > 0) || 'Recipient address is required',
-                val => !val || val.includes('@') || val.includes('lnurl') || val.length >= 20 || 'Please enter a valid Lightning address, LNbits wallet ID, or LNURLp string',
-                val => !isDuplicateRecipient(t) || 'This recipient address is already used'
-              ]"
-            ></q-input>
-            <q-select
-              v-if="target.targetChoice === 'wallet'"
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              style="width: 500px"
-              v-model="target.wallet"
-              :options="g.user.walletOptions"
-              emit-value
-              map-options
-              label="Receive wallet *"
-            >
-            </q-select>
 
-            <q-input
-              outlined
-              v-model.number="target.percent"
-              label="Split % *"
-              hint="Percentage of payment"
-              suffix="%"
-              class="q-mr-md"
-              style="min-width: 120px; max-width: 140px;"
-              type="number"
-              min="0.1"
-              max="100"
-              step="0.1"
-              :error="target.percent <= 0 || target.percent > 100"
-              error-message="Must be between 0.1% and 100%"
-              :rules="[
-                val => val > 0 || 'Percentage must be greater than 0',
-                val => val <= 100 || 'Percentage cannot exceed 100%',
-                val => (val * 10) % 1 === 0 || 'Maximum 1 decimal place allowed'
-              ]"
-            ></q-input>
+            <div class="split-fields">
+              <q-input
+                outlined
+                v-model.trim="target.alias"
+                label="Split Name *"
+                hint="A name to identify this split recipient"
+                class="split-field q-mb-md"
+                :error="(target.alias && target.alias.trim() === '') || isDuplicateName(t)"
+                :error-message="isDuplicateName(t) ? 'This split name is already used' : 'Split name is required'"
+                :rules="[
+                  val => (val && val.trim().length > 0) || 'Split name is required',
+                  val => (val && val.trim().length <= 50) || 'Split name must be 50 characters or less',
+                  val => !isDuplicateName(t) || 'This split name is already used'
+                ]"
+              ></q-input>
+
+              <q-input
+                outlined
+                v-model.trim="target.wallet"
+                label="Split Recipient *"
+                hint="Lightning Address, LNbits wallet ID, or LNURLp string"
+                class="split-field q-mb-md"
+                :error="(target.wallet && target.wallet.trim() === '') || isDuplicateRecipient(t)"
+                :error-message="isDuplicateRecipient(t) ? 'This recipient address is already used' : 'Recipient address is required'"
+                :rules="[
+                  val => (val && val.trim().length > 0) || 'Recipient address is required',
+                  val => !val || val.includes('@') || val.includes('lnurl') || val.length >= 20 || 'Please enter a valid Lightning address, LNbits wallet ID, or LNURLp string',
+                  val => !isDuplicateRecipient(t) || 'This recipient address is already used'
+                ]"
+              ></q-input>
+
+              <q-input
+                outlined
+                v-model.number="target.percent"
+                label="Split % *"
+                hint="Percentage of payment"
+                suffix="%"
+                class="split-field q-mb-md"
+                type="number"
+                min="0.1"
+                max="100"
+                step="0.1"
+                :error="target.percent <= 0 || target.percent > 100"
+                error-message="Must be between 0.1% and 100%"
+                :rules="[
+                  val => val > 0 || 'Percentage must be greater than 0',
+                  val => val <= 100 || 'Percentage cannot exceed 100%',
+                  val => (val * 10) % 1 === 0 || 'Maximum 1 decimal place allowed'
+                ]"
+              ></q-input>
+            </div>
           </div>
-          <div style="margin-top: 16px;">
-            <q-btn
-              @click="clearTarget(t)"
-              size="md"
-              icon="close"
-              color="negative"
-              text-color="white"
-              label="Remove"
-              class="self-center"
-            >
-              <q-tooltip>Remove this split recipient</q-tooltip>
-            </q-btn>
-          </div>
-        </div>
           
-          <div class="row q-mt-lg">
+          <div class="add-recipient-container q-mt-lg">
             <q-btn 
               icon="add" 
               unelevated 
               color="positive" 
               @click="addTarget()"
-              size="md"
-              class="text-weight-medium"
+              size="lg"
+              class="text-weight-medium add-recipient-btn"
               no-caps
             >
               <span v-if="targets.length === 0">Add a Split Payment Recipient</span>
@@ -309,14 +280,14 @@
           </div>
         </div>
 
-        <div class="row justify-between q-mt-xl">
+        <div class="step-navigation q-mt-xl">
           <q-btn
             unelevated
             color="grey-7"
             text-color="white"
             @click="prevStep()"
-            size="md"
-            class="text-weight-medium q-px-lg"
+            size="lg"
+            class="text-weight-medium back-button"
             no-caps
             icon="arrow_back"
             label="Back"
@@ -327,8 +298,8 @@
             :color="canProceedFromStep2 ? 'primary' : 'grey-5'"
             @click="nextStep()"
             :disabled="!canProceedFromStep2"
-            size="md"
-            class="text-weight-medium q-px-lg"
+            size="lg"
+            class="text-weight-medium continue-button"
             no-caps
             icon="arrow_forward"
           >
@@ -731,6 +702,156 @@
   /* Reduce wizard header padding on mobile */
   .step-card .q-card-section:first-child {
     padding-top: 8px;
+  }
+}
+
+/* Step 2 Mobile Improvements */
+.split-recipient-container {
+  border-left: 3px solid #1976d2;
+  padding-left: 16px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.split-recipient-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.split-number-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.split-header-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  flex: 1;
+}
+
+.remove-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.remove-btn:hover {
+  opacity: 1;
+}
+
+.split-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.split-field {
+  width: 100%;
+}
+
+.split-field .q-field__control {
+  min-height: 48px;
+}
+
+.add-recipient-container {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.add-recipient-btn {
+  min-height: 48px;
+  padding: 0 24px;
+}
+
+.step-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.back-button {
+  min-height: 48px;
+  padding: 0 20px;
+}
+
+/* Mobile-specific styles for Step 2 */
+@media (max-width: 768px) {
+  .split-recipient-container {
+    border-left: 2px solid #1976d2;
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+
+  .split-recipient-header {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .split-number-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .split-header-text {
+    font-size: 0.875rem;
+  }
+
+  .split-fields {
+    gap: 8px;
+  }
+
+  .split-field .q-field__control {
+    min-height: 52px;
+  }
+
+  .add-recipient-btn {
+    width: 100%;
+    min-height: 56px;
+    font-size: 1rem;
+  }
+
+  .step-navigation {
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 0;
+  }
+
+  .back-button {
+    width: 100%;
+    min-height: 52px;
+    order: 2;
+  }
+
+  .continue-button {
+    width: 100%;
+    min-height: 56px;
+    order: 1;
+  }
+
+  /* Improve percentage badge layout on mobile */
+  .items-center.q-gutter-md {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .items-center.q-gutter-md .q-badge {
+    align-self: flex-start;
   }
 }
 </style>
