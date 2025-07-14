@@ -275,8 +275,8 @@
 
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mt-xl">
-          <div class="text-h6 q-mb-md text-weight-medium">Split Preview</div>
           <div class="flow-chart-container">
+          <div class="text-h6 q-mb-md text-weight-medium">Split Preview</div>
             <div ref="flowChart" class="flow-chart"></div>
           </div>
         </div>
@@ -381,8 +381,8 @@
 
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mb-lg">
-          <div class="text-h6 q-mb-md text-weight-medium">Payment Flow Preview</div>
           <div class="flow-chart-container">
+          <div class="text-h6 q-mb-md text-weight-medium">Payment Flow Preview</div>
             <div ref="flowChart2" class="flow-chart"></div>
           </div>
         </div>
@@ -578,12 +578,7 @@
 
 @media (max-width: 600px) {
   .flow-chart-container {
-    padding: 10px;
-    min-height: 300px;
-  }
-  
-  .flow-chart {
-    min-height: 300px;
+    display: none;
   }
 }
 
