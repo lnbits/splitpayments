@@ -180,16 +180,6 @@
         </q-banner>
 
         <q-form class="q-gutter-md">
-          <div v-if="targets.length === 0" class="text-center q-py-xl">
-            <q-icon name="add_circle_outline" size="64px" color="grey-5" />
-            <div class="text-h6 text-grey-6 q-mt-md q-mb-sm">
-              No split targets configured
-            </div>
-            <div class="text-body1 text-grey-6">
-              Click "Add Another Split Payment Recipient" below to get started
-            </div>
-          </div>
-          
           <div
             v-for="(target, t) in targets"
             :key="t"
@@ -305,7 +295,8 @@
               class="text-weight-medium"
               no-caps
             >
-              Add Another Split Payment Recipient
+              <span v-if="targets.length === 0">Add a Split Payment Recipient</span>
+              <span v-else>Add Another Split Payment Recipient</span>
             </q-btn>
           </div>
         </q-form>
