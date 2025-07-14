@@ -215,18 +215,14 @@ window.app = Vue.createApp({
     
     // SVG Flow Chart methods
     initFlowChart() {
-      console.log('initFlowChart called, currentStep:', this.currentStep)
-      console.log('splitDiagramData:', this.splitDiagramData)
       
       // Create chart for Step 2
       if (this.$refs.flowChart && this.currentStep === 2) {
-        console.log('Creating flow chart for Step 2')
         this.createFlowChart('flowChart')
       }
       
       // Create chart for Step 3  
       if (this.$refs.flowChart2 && this.currentStep === 3) {
-        console.log('Creating flow chart for Step 3')
         this.createFlowChart('flowChart2')
       }
     },
@@ -349,7 +345,6 @@ window.app = Vue.createApp({
         })
         
         container.appendChild(svg)
-        console.log('Flow chart created successfully for:', containerRef)
       } catch (error) {
         console.error('Error creating flow chart:', error)
       }
