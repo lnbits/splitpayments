@@ -262,8 +262,9 @@ window.app = Vue.createApp({
         svg.setAttribute('viewBox', '0 0 400 400')
         svg.style.background = 'transparent'
         
-        // Get targets data
+        // Get targets data and source data
         const targets = this.splitDiagramData.filter(item => item.type === 'target')
+        const sourceRemaining = this.splitDiagramData.filter(item => item.type === 'source')
         
         if (targets.length === 0) {
           container.appendChild(svg)
@@ -276,47 +277,62 @@ window.app = Vue.createApp({
         const branchY = 200
         const targetY = 320
         
-        // Calculate target positions to fill horizontal space
-        const targetPositions = []
-        if (targets.length === 1) {
-          targetPositions.push({ x: sourceX, y: targetY })
+        // Calculate bottom row items (targets + source if remaining > 0)
+        const bottomRowItems = [...targets]
+        if (sourceRemaining.length > 0 && this.remainingPercent > 0) {
+          bottomRowItems.push({
+            name: this.selectedWallet ? this.selectedWallet.name : 'Source',
+            percent: this.remainingPercent,
+            type: 'source_remaining',
+            color: '#1976d2'
+          })
+        }
+        
+        // Calculate positions for bottom row items
+        const bottomRowPositions = []
+        if (bottomRowItems.length === 1) {
+          bottomRowPositions.push({ x: sourceX, y: targetY })
         } else {
           // Use the full width of the SVG viewBox (400px) with padding
           const padding = 10 // Padding from edges
           const totalWidth = 400 - (padding * 2) // Available width
-          const spacing = totalWidth / (targets.length - 1)
+          const spacing = totalWidth / (bottomRowItems.length - 1)
           const startX = padding
           
-          targets.forEach((target, index) => {
-            targetPositions.push({ x: startX + (index * spacing), y: targetY })
+          bottomRowItems.forEach((item, index) => {
+            bottomRowPositions.push({ x: startX + (index * spacing), y: targetY })
           })
         }
         
         // Calculate proportional line thickness
-        const maxPercent = Math.max(...targets.map(t => t.percent))
+        const maxPercent = Math.max(...bottomRowItems.map(t => t.percent))
         const maxThickness = 30 // Maximum line thickness in pixels
         
-        // Draw flowing lines
-        targets.forEach((target, index) => {
-          const targetPos = targetPositions[index]
+        // Draw flowing lines to all bottom row items
+        bottomRowItems.forEach((item, index) => {
+          const itemPos = bottomRowPositions[index]
           // Calculate thickness proportional to the highest percentage
-          const lineThickness = Math.max(3, (target.percent / maxPercent) * maxThickness)
+          const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
           
-          this.drawFlowingLine(svg, sourceX, sourceY + 40, targetPos.x, targetY - 40, lineThickness, target.color || '#4ade80')
+          this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
           
           // Add percentage label - center it on the curved line
-          const labelX = (sourceX + targetPos.x) / 2
+          const labelX = (sourceX + itemPos.x) / 2
           const labelY = sourceY + 40 + ((targetY - 40) - (sourceY + 40)) * 0.6 // Position at the curve peak
-          // this.addPercentageLabel(svg, labelX, labelY, `${target.percent}%`, target.color || '#4ade80')
+          // this.addPercentageLabel(svg, labelX, labelY, `${item.percent}%`, item.color || '#4ade80')
         })
         
         // Draw source wallet icon
         this.drawWalletIcon(svg, sourceX, sourceY, 'source', this.remainingPercent)
         
-        // Draw target wallet icons
-        targets.forEach((target, index) => {
-          const targetPos = targetPositions[index]
-          this.drawWalletIcon(svg, targetPos.x, targetPos.y, 'target', target.percent, target.name)
+        // Draw bottom row wallet icons
+        bottomRowItems.forEach((item, index) => {
+          const itemPos = bottomRowPositions[index]
+          if (item.type === 'source_remaining') {
+            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'source_remaining', item.percent, item.name)
+          } else {
+            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'target', item.percent, item.name)
+          }
         })
         
         container.appendChild(svg)
@@ -366,7 +382,7 @@ window.app = Vue.createApp({
       image.setAttribute('href', possiblePaths[0])
       
       // Add color filter for source vs target distinction
-      if (type === 'source') {
+      if (type === 'source' || type === 'source_remaining') {
         // Add blue tint for source wallet
         image.setAttribute('style', 'filter: hue-rotate(200deg) saturate(1.2)')
       }
@@ -397,15 +413,15 @@ window.app = Vue.createApp({
         svg.appendChild(sourceNameText)
       }
       
-      // Add target name and percentage below icon if it's a target
-      if (type === 'target') {
-        // Add split name text
+      // Add name and percentage below icon for targets and source_remaining
+      if (type === 'target' || type === 'source_remaining') {
+        // Add name text
         if (targetName) {
           const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#374151')
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -419,7 +435,7 @@ window.app = Vue.createApp({
         percentText.setAttribute('x', x)
         percentText.setAttribute('y', y + 80)
         percentText.setAttribute('text-anchor', 'middle')
-        percentText.setAttribute('fill', '#f59e0b')
+        percentText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#f59e0b')
         percentText.setAttribute('font-family', 'Arial, sans-serif')
         percentText.setAttribute('font-size', '32px')
         percentText.setAttribute('font-weight', 'bold')
@@ -437,7 +453,7 @@ window.app = Vue.createApp({
       rect.setAttribute('width', 60)
       rect.setAttribute('height', 60)
       rect.setAttribute('rx', 12)
-      rect.setAttribute('fill', type === 'source' ? '#6366f1' : '#f59e0b')
+      rect.setAttribute('fill', (type === 'source' || type === 'source_remaining') ? '#6366f1' : '#f59e0b')
       rect.setAttribute('stroke', '#1f2937')
       rect.setAttribute('stroke-width', 2)
       
@@ -472,15 +488,15 @@ window.app = Vue.createApp({
         svg.appendChild(sourceNameText)
       }
       
-      // Add target name and percentage below icon if it's a target
-      if (type === 'target') {
-        // Add split name text
+      // Add name and percentage below icon for targets and source_remaining
+      if (type === 'target' || type === 'source_remaining') {
+        // Add name text
         if (targetName) {
           const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#374151')
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -494,7 +510,7 @@ window.app = Vue.createApp({
         percentText.setAttribute('x', x)
         percentText.setAttribute('y', y + 65)
         percentText.setAttribute('text-anchor', 'middle')
-        percentText.setAttribute('fill', '#f59e0b')
+        percentText.setAttribute('fill', type === 'source_remaining' ? '#1976d2' : '#f59e0b')
         percentText.setAttribute('font-family', 'Arial, sans-serif')
         percentText.setAttribute('font-size', '16px')
         percentText.setAttribute('font-weight', 'bold')
