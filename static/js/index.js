@@ -381,6 +381,22 @@ window.app = Vue.createApp({
       
       svg.appendChild(image)
       
+      // Add source wallet name above icon if it's a source
+      if (type === 'source') {
+        // Add source wallet name text above the icon
+        const sourceNameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+        sourceNameText.setAttribute('x', x)
+        sourceNameText.setAttribute('y', y - 45)
+        sourceNameText.setAttribute('text-anchor', 'middle')
+        sourceNameText.setAttribute('fill', '#1976d2')
+        sourceNameText.setAttribute('font-family', 'Arial, sans-serif')
+        sourceNameText.setAttribute('font-size', '14px')
+        sourceNameText.setAttribute('font-weight', 'bold')
+        sourceNameText.textContent = this.selectedWallet ? this.selectedWallet.name : 'Source Wallet'
+        
+        svg.appendChild(sourceNameText)
+      }
+      
       // Add target name and percentage below icon if it's a target
       if (type === 'target') {
         // Add split name text
@@ -439,6 +455,22 @@ window.app = Vue.createApp({
       text.textContent = '₿'
       
       svg.appendChild(text)
+      
+      // Add source wallet name above icon if it's a source
+      if (type === 'source') {
+        // Add source wallet name text above the icon
+        const sourceNameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+        sourceNameText.setAttribute('x', x)
+        sourceNameText.setAttribute('y', y - 45)
+        sourceNameText.setAttribute('text-anchor', 'middle')
+        sourceNameText.setAttribute('fill', '#1976d2')
+        sourceNameText.setAttribute('font-family', 'Arial, sans-serif')
+        sourceNameText.setAttribute('font-size', '14px')
+        sourceNameText.setAttribute('font-weight', 'bold')
+        sourceNameText.textContent = this.selectedWallet ? this.selectedWallet.name : 'Source Wallet'
+        
+        svg.appendChild(sourceNameText)
+      }
       
       // Add target name and percentage below icon if it's a target
       if (type === 'target') {
