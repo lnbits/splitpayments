@@ -14,6 +14,7 @@
           flat
           keep-alive
           header-nav
+          :vertical="$q.screen.lt.md"
         >
           <q-step :name="1" title="Select Source Wallet" icon="account_balance_wallet" :done="currentStep > 1">
           </q-step>
@@ -26,10 +27,10 @@
     </q-card>
 
     <!-- Step 1: Source Wallet Selection -->
-    <q-card v-show="currentStep === 1">
-      <q-card-section>
-        <div class="text-h5 text-weight-medium q-mb-md">Select Source Wallet</div>
-        <p class="text-body1 q-mb-lg text-grey-7">Choose the wallet from which payments will be split.</p>
+    <q-card v-show="currentStep === 1" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">Select Source Wallet</div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">Choose the wallet from which payments will be split.</p>
 
         <q-form class="q-gutter-md">
           <div v-if="g.user.wallets.length === 0" class="text-center q-py-xl">
@@ -42,37 +43,53 @@
             </div>
           </div>
           
-          <q-option-group
-            v-else
-            v-model="selectedWallet"
-            :options="g.user.wallets.map(w => ({label: w.name, value: w}))"
-            color="primary"
-            type="radio"
-          /> 
+          <div v-else class="wallet-selection">
+            <q-card 
+              v-for="wallet in g.user.wallets" 
+              :key="wallet.id"
+              flat
+              bordered
+              class="wallet-option q-mb-md"
+              :class="{ 'selected': selectedWallet === wallet }"
+              @click="selectedWallet = wallet"
+            >
+              <q-card-section class="row items-center q-py-md">
+                <q-radio 
+                  v-model="selectedWallet" 
+                  :val="wallet" 
+                  color="primary"
+                  size="md"
+                  class="q-mr-md"
+                />
+                <div class="col">
+                  <div class="text-h6 text-weight-medium">{% raw %}{{ wallet.name }}{% endraw %}</div>
+                  <div class="text-caption text-grey-6">{% raw %}{{ wallet.id }}{% endraw %}</div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div> 
           
           <q-banner 
             v-if="g.user.wallets.length > 0 && !selectedWallet"
-            class="bg-blue-2 text-blue-9 q-mt-md" 
+            class="bg-blue-2 text-blue-9 q-mt-md info-banner" 
             rounded
+            dense
           >
             <template v-slot:avatar>
-              <q-icon name="info" />
+              <q-icon name="info" size="sm" />
             </template>
-            <div class="text-weight-medium">Select a source wallet</div>
-            <div class="q-mt-xs">
-              Choose which wallet will receive payments and automatically split them to your configured recipients.
-            </div>
+            <div class="text-body2 text-weight-medium">Select a source wallet to continue</div>
           </q-banner>
         </q-form>
 
-        <div class="row justify-end q-mt-xl">
+        <div class="continue-button-container q-mt-xl">
           <q-btn
             unelevated
             :color="canProceedFromStep1 ? 'primary' : 'grey-5'"
             @click="nextStep()"
             :disabled="!canProceedFromStep1"
-            size="md"
-            class="text-weight-medium q-px-lg"
+            size="lg"
+            class="text-weight-medium continue-button"
             no-caps
           >
             {% raw %}{{ canProceedFromStep1 ? 'Continue' : 'Select Wallet to Continue' }}{% endraw %}
@@ -614,6 +631,115 @@
   
   .flow-chart {
     min-height: 300px;
+  }
+}
+
+/* Step 1 Mobile Improvements */
+.step-card {
+  margin-bottom: 16px;
+}
+
+.step-section {
+  padding: 16px;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.step-description {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Wallet selection improvements */
+.wallet-option {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 60px;
+}
+
+.wallet-option:hover {
+  background-color: #f5f5f5;
+}
+
+.wallet-option.selected {
+  border-color: #1976d2;
+  background-color: #e3f2fd;
+}
+
+.wallet-option .q-radio {
+  min-height: 48px;
+}
+
+/* Info banner improvements */
+.info-banner {
+  margin-top: 16px;
+}
+
+/* Continue button improvements */
+.continue-button-container {
+  padding: 16px 0;
+}
+
+.continue-button {
+  min-height: 48px;
+  padding: 0 24px;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .step-section {
+    padding: 12px;
+  }
+
+  .step-title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+  }
+
+  .step-description {
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+  }
+
+  .wallet-option {
+    min-height: 64px;
+  }
+
+  .wallet-option .q-card-section {
+    padding: 16px;
+  }
+
+  .continue-button {
+    width: 100%;
+    min-height: 56px;
+    font-size: 1rem;
+  }
+
+  .continue-button-container {
+    padding: 20px 0;
+  }
+
+  .info-banner {
+    margin-top: 12px;
+    padding: 12px;
+  }
+
+  /* Stepper improvements on mobile */
+  .q-stepper--vertical .q-stepper__step {
+    padding: 8px 0;
+  }
+
+  .q-stepper--vertical .q-stepper__dot {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Reduce wizard header padding on mobile */
+  .step-card .q-card-section:first-child {
+    padding-top: 8px;
   }
 }
 </style>
