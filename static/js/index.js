@@ -316,7 +316,9 @@ window.app = Vue.createApp({
             // Calculate thickness proportional to the highest percentage
             const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
             
-            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
+            // End the line before the wallet icon (30px is wallet icon radius)
+            const lineEndY = targetY - 45
+            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
           }
         })
         
@@ -327,7 +329,9 @@ window.app = Vue.createApp({
             // Calculate thickness proportional to the highest percentage
             const lineThickness = Math.max(3, (item.percent / maxPercent) * maxThickness)
             
-            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, targetY - 40, lineThickness, item.color || '#4ade80')
+            // End the line before the wallet icon (30px is wallet icon radius)
+            const lineEndY = targetY - 45
+            this.drawFlowingLine(svg, sourceX, sourceY + 40, itemPos.x, lineEndY, lineThickness, item.color || '#4ade80')
           }
         })
         
