@@ -46,8 +46,8 @@ window.SplitPaymentsChart = Vue.defineComponent({
         // Create SVG element
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
         svg.setAttribute('width', '100%')
-        svg.setAttribute('height', '400')
-        svg.setAttribute('viewBox', '0 0 400 400')
+        svg.setAttribute('height', '500')
+        svg.setAttribute('viewBox', '0 0 400 450')
         svg.style.background = 'transparent'
         
         // Get targets data and source data
@@ -270,7 +270,6 @@ window.SplitPaymentsChart = Vue.defineComponent({
         console.warn('Failed to load wallet icon, using fallback')
         // Remove the broken image and replace with a styled rectangle
         svg.removeChild(image)
-        this.drawFallbackWalletIcon(svg, x, y, type, percentage, targetName, isDarkTheme)
       })
       
       svg.appendChild(image)
@@ -281,12 +280,10 @@ window.SplitPaymentsChart = Vue.defineComponent({
         if (targetName) {
           const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
           nameText.setAttribute('x', x)
-          nameText.setAttribute('y', y + 45)
+          nameText.setAttribute('y', y + 55)
           nameText.setAttribute('text-anchor', 'middle')
           nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : (isDarkTheme ? '#f3f4f6' : '#374151'))
-          nameText.setAttribute('font-family', 'Arial, sans-serif')
-          nameText.setAttribute('font-size', '14px')
-          nameText.setAttribute('font-weight', 'bold')
+          nameText.setAttribute('class', 'text-body2')
           nameText.textContent = targetName
           
           svg.appendChild(nameText)
@@ -295,71 +292,10 @@ window.SplitPaymentsChart = Vue.defineComponent({
         // Add percentage text below name
         const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
         percentText.setAttribute('x', x)
-        percentText.setAttribute('y', y + 80)
+        percentText.setAttribute('y', y + 85)
         percentText.setAttribute('text-anchor', 'middle')
         percentText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#f59e0b')
-        percentText.setAttribute('font-family', 'Arial, sans-serif')
-        percentText.setAttribute('font-size', '32px')
-        percentText.setAttribute('font-weight', 'bold')
-        percentText.textContent = `${percentage}%`
-        
-        svg.appendChild(percentText)
-      }
-    },
-    
-    drawFallbackWalletIcon(svg, x, y, type, percentage, targetName = null, isDarkTheme = false) {
-      // Fallback wallet icon when PNG fails to load
-      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-      rect.setAttribute('x', x - 30)
-      rect.setAttribute('y', y - 30)
-      rect.setAttribute('width', 60)
-      rect.setAttribute('height', 60)
-      rect.setAttribute('rx', 12)
-      rect.setAttribute('fill', (type === 'source' || type === 'source_remaining') ? (type === 'source_remaining' ? '#96A6FF' : '#6366f1') : '#f59e0b')
-      rect.setAttribute('stroke', '#1f2937')
-      rect.setAttribute('stroke-width', 2)
-      
-      svg.appendChild(rect)
-      
-      // Add Bitcoin symbol
-      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-      text.setAttribute('x', x)
-      text.setAttribute('y', y + 5)
-      text.setAttribute('text-anchor', 'middle')
-      text.setAttribute('fill', 'white')
-      text.setAttribute('font-family', 'Arial, sans-serif')
-      text.setAttribute('font-size', '24')
-      text.setAttribute('font-weight', 'bold')
-      text.textContent = '₿'
-      
-      svg.appendChild(text)
-      
-      // Add name and percentage below icon for targets and source_remaining
-      if (type === 'target' || type === 'source_remaining') {
-        // Add name text
-        if (targetName) {
-          const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-          nameText.setAttribute('x', x)
-          nameText.setAttribute('y', y + 45)
-          nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : (isDarkTheme ? '#f3f4f6' : '#374151'))
-          nameText.setAttribute('font-family', 'Arial, sans-serif')
-          nameText.setAttribute('font-size', '14px')
-          nameText.setAttribute('font-weight', 'bold')
-          nameText.textContent = targetName
-          
-          svg.appendChild(nameText)
-        }
-        
-        // Add percentage text below name
-        const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-        percentText.setAttribute('x', x)
-        percentText.setAttribute('y', y + 65)
-        percentText.setAttribute('text-anchor', 'middle')
-        percentText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#f59e0b')
-        percentText.setAttribute('font-family', 'Arial, sans-serif')
-        percentText.setAttribute('font-size', '16px')
-        percentText.setAttribute('font-weight', 'bold')
+        percentText.setAttribute('class', 'text-h5')
         percentText.textContent = `${percentage}%`
         
         svg.appendChild(percentText)
@@ -384,9 +320,6 @@ window.SplitPaymentsChart = Vue.defineComponent({
       incomingText.setAttribute('y', y - 50)
       incomingText.setAttribute('text-anchor', 'middle')
       incomingText.setAttribute('fill', isDarkTheme ? '#f9ca24' : '#f7931a')
-      incomingText.setAttribute('font-family', 'Arial, sans-serif')
-      incomingText.setAttribute('font-size', '16px')
-      incomingText.setAttribute('font-weight', 'bold')
       incomingText.textContent = 'Incoming Payment'
       
       svg.appendChild(incomingText)
