@@ -33,7 +33,8 @@ window.app = Vue.createApp({
       // Existing data
       selectedWallet: null,
       currentHash: '', // a string that must match if the edit data is unchanged
-      targets: []
+      targets: [],
+      walletSplits: {} // Store split data for each wallet
     }
   },
   computed: {
@@ -133,6 +134,28 @@ window.app = Vue.createApp({
     },
     isDirty() {
       return hashTargets(this.targets) !== this.currentHash
+    },
+    
+    // Get split summaries for all wallets
+    walletSplitSummaries() {
+      const summaries = {}
+      
+      for (const walletId in this.walletSplits) {
+        const splits = this.walletSplits[walletId]
+        if (splits && splits.length > 0) {
+          const totalPercent = splits.reduce((sum, split) => sum + (split.percent || 0), 0)
+          const remainingPercent = Math.max(0, 100 - totalPercent)
+          
+          summaries[walletId] = {
+            totalPercent,
+            remainingPercent,
+            splitCount: splits.length,
+            splits: splits.slice(0, 3) // Show first 3 splits
+          }
+        }
+      }
+      
+      return summaries
     }
   },
   methods: {
@@ -328,6 +351,8 @@ window.app = Vue.createApp({
     },
     
     async checkExistingConfigurations() {
+      let firstWalletWithSplits = null
+      
       // Check each wallet for existing split payment configurations
       for (const wallet of this.g.user.wallets) {
         try {
@@ -337,10 +362,13 @@ window.app = Vue.createApp({
             wallet.adminkey
           )
           if (response.data && response.data.length > 0) {
-            // Found existing configuration, select this wallet
-            this.selectedWallet = wallet
-            this.getTargets()
-            return
+            // Store split data for this wallet
+            this.walletSplits[wallet.id] = response.data
+            
+            // Remember the first wallet with splits
+            if (!firstWalletWithSplits) {
+              firstWalletWithSplits = wallet
+            }
           }
         } catch (err) {
           // Wallet has no configuration, continue checking others
@@ -348,8 +376,11 @@ window.app = Vue.createApp({
         }
       }
       
-      // No existing configurations found, select first wallet
-      if (this.g.user.wallets.length > 0) {
+      // Select first wallet with splits, or first wallet if none have splits
+      if (firstWalletWithSplits) {
+        this.selectedWallet = firstWalletWithSplits
+        this.getTargets()
+      } else if (this.g.user.wallets.length > 0) {
         this.selectedWallet = this.g.user.wallets[0]
       }
     }

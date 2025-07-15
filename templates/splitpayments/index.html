@@ -59,12 +59,21 @@
                   :val="wallet" 
                   color="primary"
                   size="md"
-                  class="q-mr-md"
                 />
-                <div class="col">
-                  <div class="text-h6 text-weight-medium">{% raw %}{{ wallet.name }}{% endraw %}</div>
-                  <div class="text-caption text-grey-6">{% raw %}{{ wallet.id }}{% endraw %}</div>
-                </div>
+                  <div class="row">
+                    <div class="col">
+                      <div class="text-h6 text-weight-medium">{% raw %}{{ wallet.name }}{% endraw %}</div>
+                      <div class="text-caption text-grey-6">{% raw %}{{ wallet.id }}{% endraw %}</div>
+                    </div>
+                    <div class="col-auto q-ml-md justify-end">
+                      <div v-if="walletSplitSummaries[wallet.id]" class="q-mt-sm">
+                        <q-chip color="green" text-color="white" size="md" icon="share" class="q-p-sm">
+                          {% raw %}{{ walletSplitSummaries[wallet.id].splitCount }}{% endraw %} split{% raw %}{{ walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' : '' }}{% endraw %} 
+                          ({% raw %}{{ walletSplitSummaries[wallet.id].totalPercent }}%{% endraw %})
+                        </q-chip>
+                      </div>
+                    </div>
+                  </div>
               </q-card-section>
             </q-card>
           </div> 
