@@ -275,10 +275,12 @@
 
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mt-xl">
-          <div class="flow-chart-container">
           <div class="text-h6 q-mb-md text-weight-medium">Split Preview</div>
-            <div ref="flowChart" class="flow-chart"></div>
-          </div>
+          <split-payments-chart 
+            :split-diagram-data="splitDiagramData"
+            :selected-wallet="selectedWallet"
+            :remaining-percent="remainingPercent"
+          />
         </div>
 
         <div class="step-navigation q-mt-xl">
@@ -381,10 +383,12 @@
 
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mb-lg">
-          <div class="flow-chart-container">
           <div class="text-h6 q-mb-md text-weight-medium">Payment Flow Preview</div>
-            <div ref="flowChart2" class="flow-chart"></div>
-          </div>
+          <split-payments-chart 
+            :split-diagram-data="splitDiagramData"
+            :selected-wallet="selectedWallet"
+            :remaining-percent="remainingPercent"
+          />
         </div>
 
         <!-- Validation Status for Step 3 -->
@@ -1062,5 +1066,6 @@
 {% endblock %}
 
 {% block scripts %} {{ window_vars(user) }}
+<script src="/splitpayments/static/js/chart.js"></script>
 <script src="/splitpayments/static/js/index.js"></script>
 {% endblock %}
