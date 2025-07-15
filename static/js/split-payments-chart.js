@@ -54,7 +54,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
         const targets = this.splitDiagramData.filter(item => item.type === 'target')
         const sourceRemaining = this.splitDiagramData.filter(item => item.type === 'source')
         
-        if (targets.length === 0) {
+        if (targets.length === 0 && sourceRemaining.length === 0) {
           container.appendChild(svg)
           return
         }

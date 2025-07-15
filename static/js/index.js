@@ -110,16 +110,6 @@ window.app = Vue.createApp({
     splitDiagramData() {
       const data = []
       
-      // Add source wallet (remaining percentage)
-      if (this.remainingPercent > 0) {
-        data.push({
-          name: this.selectedWallet ? this.selectedWallet.name : 'Source',
-          percent: this.remainingPercent,
-          type: 'source',
-          color: '#1976d2'
-        })
-      }
-      
       // Add target wallets
       this.targets.forEach(target => {
         if (target.percent > 0 && target.alias) {
@@ -131,6 +121,17 @@ window.app = Vue.createApp({
           })
         }
       })
+      
+      // Add source wallet (remaining percentage or 100% if no targets)
+      const remainingPercent = this.targets.length > 0 ? this.remainingPercent : 100
+      if (remainingPercent > 0) {
+        data.push({
+          name: this.selectedWallet ? this.selectedWallet.name : 'Source',
+          percent: remainingPercent,
+          type: 'source',
+          color: '#1976d2'
+        })
+      }
       
       return data.sort((a, b) => b.percent - a.percent)
     },
