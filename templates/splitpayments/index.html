@@ -31,6 +31,34 @@
       <q-card-section class="step-section">
         <div class="text-h4 text-weight-bold q-mb-md step-title">Select Source Wallet</div>
         <p class="text-body1 q-mb-lg text-grey-7 step-description">Choose the wallet from which payments will be split.</p>
+        
+        <!-- Success Confirmation Banner -->
+        <q-banner 
+          v-if="showSavedConfirmation"
+          class="bg-positive text-white q-mb-lg" 
+          rounded
+          dense
+        >
+          <template v-slot:avatar>
+            <q-icon name="check_circle" size="md" />
+          </template>
+          <div class="text-body1 text-weight-medium">
+            Split payments successfully activated!
+          </div>
+          <div class="text-body2 q-mt-xs">
+            {% raw %}{{ lastSavedTargetCount }}{% endraw %} split target{% raw %}{{ lastSavedTargetCount !== 1 ? 's' : '' }}{% endraw %} configured for 
+            <strong>{% raw %}{{ selectedWallet ? selectedWallet.name : 'the selected wallet' }}{% endraw %}</strong>.
+          </div>
+          <template v-slot:action>
+            <q-btn 
+              flat 
+              color="white" 
+              label="Dismiss" 
+              @click="showSavedConfirmation = false"
+              size="sm"
+            />
+          </template>
+        </q-banner>
 
         <q-form class="q-gutter-md">
           <div v-if="g.user.wallets.length === 0" class="text-center q-py-xl">
@@ -415,29 +443,14 @@
           </ul>
         </q-banner>
 
-        <!-- Success Status -->
-        <q-banner 
-          v-else-if="targets.length > 0 && allTargetsValid && totalPercent <= 100"
-          class="bg-positive text-white q-mb-lg" 
-          rounded
-        >
-          <template v-slot:avatar>
-            <q-icon name="check_circle" />
-          </template>
-          <div class="text-weight-medium">Configuration ready!</div>
-          <div class="q-mt-xs">
-          Your split payment configuration is valid and ready to activate.
-          </div>
-        </q-banner>
-
         <!-- Important Notice -->
-        <q-banner class="bg-orange-2 text-orange-9 q-mb-lg" rounded>
+        <q-banner class="bg-orange-2 text-orange-9 q-mb-lg" rounded v-if="totalPercent >= 95">
           <template v-slot:avatar>
             <q-icon name="info" color="orange" />
           </template>
           <div class="text-weight-medium">Important:</div>
           <div class="q-mt-xs">
-            <p>• Splits totaling 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
+            <p>• Splits totaling close to 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
               <br>
             • Each payment to this wallet will be automatically split when it arrives</p>
           </div>

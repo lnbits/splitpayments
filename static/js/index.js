@@ -34,7 +34,9 @@ window.app = Vue.createApp({
       selectedWallet: null,
       currentHash: '', // a string that must match if the edit data is unchanged
       targets: [],
-      walletSplits: {} // Store split data for each wallet
+      walletSplits: {}, // Store split data for each wallet
+      showSavedConfirmation: false, // Show confirmation after saving
+      lastSavedTargetCount: 0 // Track number of targets that were saved
     }
   },
   computed: {
@@ -163,6 +165,7 @@ window.app = Vue.createApp({
     nextStep() {
       if (this.currentStep < this.maxSteps) {
         if (this.currentStep === 1 && this.canProceedFromStep1) {
+          this.showSavedConfirmation = false // Hide confirmation when proceeding
           this.currentStep++
           this.scrollToTop()
         } else if (this.currentStep === 2 && this.canProceedFromStep2) {
@@ -313,6 +316,11 @@ window.app = Vue.createApp({
           })
           // Update hash to reflect saved state
           this.currentHash = hashTargets(this.targets)
+          // Update wallet splits data
+          this.walletSplits[this.selectedWallet.id] = [...this.targets]
+          // Show confirmation banner on step 1
+          this.showSavedConfirmation = true
+          this.lastSavedTargetCount = this.targets.length
           // Reset to step 1 after successful save
           this.currentStep = 1
           this.scrollToTop()
