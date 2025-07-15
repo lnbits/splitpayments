@@ -321,7 +321,7 @@
         <!-- Configuration Summary Cards -->
         <div class="summary-cards-container q-mb-lg">
           <!-- Source Wallet Card -->
-          <q-card flat bordered class="bg-blue-1 summary-card">
+          <q-card flat bordered class="summary-card summary-card-source">
             <q-card-section class="summary-card-section">
               <div class="summary-card-header">
                 <q-icon name="account_balance_wallet" size="md" class="q-mr-sm" />
@@ -339,7 +339,7 @@
           </q-card>
 
           <!-- Splits Summary Card -->
-          <q-card flat bordered class="bg-green-1 summary-card">
+          <q-card flat bordered class="summary-card summary-card-targets">
             <q-card-section class="summary-card-section">
               <div class="summary-card-header">
                 <q-icon name="share" size="md" class="q-mr-sm" />
@@ -567,10 +567,14 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--q-color-grey-3);
   border-radius: 12px;
   margin: 16px 0;
   min-height: 400px;
+}
+
+.body--dark .flow-chart-container {
+  background: var(--q-color-grey-9);
 }
 
 .flow-chart {
@@ -866,6 +870,22 @@
   overflow: hidden;
 }
 
+.summary-card-source {
+  background: var(--q-color-blue-1);
+}
+
+.summary-card-targets {
+  background: var(--q-color-green-1);
+}
+
+.body--dark .summary-card-source {
+  background: var(--q-color-blue-10);
+}
+
+.body--dark .summary-card-targets {
+  background: var(--q-color-green-10);
+}
+
 .summary-card-section {
   padding: 16px;
 }
@@ -874,7 +894,23 @@
   display: flex;
   align-items: center;
   margin-bottom: 12px;
-  color: #1976d2;
+  color: var(--q-color-primary);
+}
+
+.summary-card-source .summary-card-header {
+  color: var(--q-color-blue-8);
+}
+
+.summary-card-targets .summary-card-header {
+  color: var(--q-color-green-8);
+}
+
+.body--dark .summary-card-source .summary-card-header {
+  color: var(--q-color-blue-4);
+}
+
+.body--dark .summary-card-targets .summary-card-header {
+  color: var(--q-color-green-4);
 }
 
 .summary-card-title {
@@ -893,21 +929,34 @@
 .summary-card-main-text {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1976d2;
+  color: var(--q-color-primary);
+}
+
+.summary-card-source .summary-card-main-text {
+  color: var(--q-color-blue-8);
+}
+
+.summary-card-targets .summary-card-main-text {
+  color: var(--q-color-green-8);
+}
+
+.body--dark .summary-card-source .summary-card-main-text {
+  color: var(--q-color-blue-4);
+}
+
+.body--dark .summary-card-targets .summary-card-main-text {
+  color: var(--q-color-green-4);
 }
 
 .summary-card-sub-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--q-color-grey-7);
 }
 
-.bg-green-1 .summary-card-header {
-  color: #059669;
+.body--dark .summary-card-sub-text {
+  color: var(--q-color-grey-5);
 }
 
-.bg-green-1 .summary-card-main-text {
-  color: #059669;
-}
 
 .detailed-targets-container {
   margin-bottom: 24px;
@@ -924,9 +973,14 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--q-color-grey-1);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--q-color-grey-4);
+}
+
+.body--dark .target-summary-item {
+  background: var(--q-color-grey-9);
+  border-color: var(--q-color-grey-7);
 }
 
 .target-percent-circle {
@@ -953,13 +1007,21 @@
 .target-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--q-color-grey-9);
+}
+
+.body--dark .target-name {
+  color: var(--q-color-grey-3);
 }
 
 .target-wallet {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--q-color-grey-7);
   word-break: break-all;
+}
+
+.body--dark .target-wallet {
+  color: var(--q-color-grey-5);
 }
 
 .step-3-navigation {

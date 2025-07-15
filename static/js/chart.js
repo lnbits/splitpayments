@@ -40,6 +40,9 @@ window.SplitPaymentsChart = Vue.defineComponent({
         // Clear previous content
         container.innerHTML = ''
         
+        // Detect dark theme
+        const isDarkTheme = document.body.classList.contains('body--dark')
+        
         // Create SVG element
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
         svg.setAttribute('width', '100%')
@@ -120,15 +123,15 @@ window.SplitPaymentsChart = Vue.defineComponent({
         })
         
         // Draw source Bitcoin logo
-        this.drawBitcoinLogo(svg, sourceX, sourceY)
+        this.drawBitcoinLogo(svg, sourceX, sourceY, isDarkTheme)
         
         // Draw bottom row wallet icons
         bottomRowItems.forEach((item, index) => {
           const itemPos = bottomRowPositions[index]
           if (item.type === 'source_remaining') {
-            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'source_remaining', item.percent, item.name)
+            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'source_remaining', item.percent, item.name, isDarkTheme)
           } else {
-            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'target', item.percent, item.name)
+            this.drawWalletIcon(svg, itemPos.x, itemPos.y, 'target', item.percent, item.name, isDarkTheme)
           }
         })
         
@@ -246,7 +249,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
       svg.appendChild(polygon)
     },
     
-    drawWalletIcon(svg, x, y, type, percentage, targetName = null) {
+    drawWalletIcon(svg, x, y, type, percentage, targetName = null, isDarkTheme = false) {
       // Create wallet icon using the PNG image
       const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
       image.setAttribute('x', x - 30)
@@ -267,7 +270,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
         console.warn('Failed to load wallet icon, using fallback')
         // Remove the broken image and replace with a styled rectangle
         svg.removeChild(image)
-        this.drawFallbackWalletIcon(svg, x, y, type, percentage, targetName)
+        this.drawFallbackWalletIcon(svg, x, y, type, percentage, targetName, isDarkTheme)
       })
       
       svg.appendChild(image)
@@ -280,7 +283,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : (isDarkTheme ? '#f3f4f6' : '#374151'))
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -304,7 +307,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
       }
     },
     
-    drawFallbackWalletIcon(svg, x, y, type, percentage, targetName = null) {
+    drawFallbackWalletIcon(svg, x, y, type, percentage, targetName = null, isDarkTheme = false) {
       // Fallback wallet icon when PNG fails to load
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
       rect.setAttribute('x', x - 30)
@@ -339,7 +342,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
           nameText.setAttribute('x', x)
           nameText.setAttribute('y', y + 45)
           nameText.setAttribute('text-anchor', 'middle')
-          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : '#374151')
+          nameText.setAttribute('fill', type === 'source_remaining' ? '#96A6FF' : (isDarkTheme ? '#f3f4f6' : '#374151'))
           nameText.setAttribute('font-family', 'Arial, sans-serif')
           nameText.setAttribute('font-size', '14px')
           nameText.setAttribute('font-weight', 'bold')
@@ -363,7 +366,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
       }
     },
     
-    drawBitcoinLogo(svg, x, y) {
+    drawBitcoinLogo(svg, x, y, isDarkTheme = false) {
       // Create Bitcoin logo using SVG
       const logoGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
       
@@ -380,7 +383,7 @@ window.SplitPaymentsChart = Vue.defineComponent({
       incomingText.setAttribute('x', x)
       incomingText.setAttribute('y', y - 50)
       incomingText.setAttribute('text-anchor', 'middle')
-      incomingText.setAttribute('fill', '#f7931a')
+      incomingText.setAttribute('fill', isDarkTheme ? '#f9ca24' : '#f7931a')
       incomingText.setAttribute('font-family', 'Arial, sans-serif')
       incomingText.setAttribute('font-size', '16px')
       incomingText.setAttribute('font-weight', 'bold')
