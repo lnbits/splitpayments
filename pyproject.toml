@@ -13,7 +13,7 @@ lnbits = {version = "*", allow-prereleases = true}
 black = "^24.3.0"
 pytest-asyncio = "^0.21.0"
 pytest = "^7.3.2"
-mypy = "^1.5.1"
+mypy = "^1.17.1"
 pre-commit = "^3.2.2"
 ruff = "^0.3.2"
 
@@ -23,6 +23,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 exclude = "(nostr/*)"
+plugins = "pydantic.mypy"
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
 [[tool.mypy.overrides]]
 module = [
   "lnbits.*",

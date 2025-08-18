@@ -105,9 +105,7 @@ async def get_lnurl_invoice(
     rounded_amount = floor(amount_msat / 1000) * 1000
 
     try:
-        # TODO add memo after lib update
-        print(memo)
-        payment_request = await get_pr_from_lnurl(payoraddress, rounded_amount)
+        payment_request = await get_pr_from_lnurl(payoraddress, rounded_amount, memo)
     except Exception as e:
         logger.error(f"Error getting LNURL invoice: {e!s}")
         return None
