@@ -1,14 +1,17 @@
 import asyncio
-import json
 from math import floor
 from typing import Optional
 
 import bolt11
-import httpx
 from lnbits.core.crud import get_standalone_payment
 from lnbits.core.crud.wallets import get_wallet_for_key
 from lnbits.core.models import Payment
-from lnbits.core.services import create_invoice, fee_reserve, pay_invoice
+from lnbits.core.services import (
+    create_invoice,
+    fee_reserve,
+    get_pr_from_lnurl,
+    pay_invoice,
+)
 from lnbits.tasks import register_invoice_listener
 from loguru import logger
 
@@ -96,39 +99,18 @@ async def pay_invoice_in_background(payment_request, wallet_id, description, ext
 
 
 async def get_lnurl_invoice(
-    payoraddress, wallet_id, amount_msat, memo
+    payoraddress: str, wallet_id: str, amount_msat: int, memo: str
 ) -> Optional[str]:
 
-    from lnbits.core.views.api import api_lnurlscan
-
-    data = await api_lnurlscan(payoraddress)
     rounded_amount = floor(amount_msat / 1000) * 1000
 
-    async with httpx.AsyncClient() as client:
-        try:
-            r = await client.get(
-                data["callback"],
-                params={"amount": rounded_amount, "comment": memo},
-                timeout=5,
-            )
-            if r.is_error:
-                raise httpx.ConnectError("issue with scrub callback")
-            r.raise_for_status()
-        except (httpx.ConnectError, httpx.RequestError):
-            logger.error(
-                f"splitting LNURL failed: Failed to connect to {data['callback']}."
-            )
-            return None
-        except Exception as exc:
-            logger.error(f"splitting LNURL failed: {exc!s}.")
-            return None
-
-    params = json.loads(r.text)
-    if params.get("status") == "ERROR":
-        logger.error(f"{data['callback']} said: '{params.get('reason', '')}'")
+    try:
+        payment_request = await get_pr_from_lnurl(payoraddress, rounded_amount, memo)
+    except Exception as e:
+        logger.error(f"Error getting LNURL invoice: {e!s}")
         return None
 
-    invoice = bolt11.decode(params["pr"])
+    invoice = bolt11.decode(payment_request)
 
     lnurlp_payment = await get_standalone_payment(invoice.payment_hash)
 
@@ -136,13 +118,4 @@ async def get_lnurl_invoice(
         logger.error("split failed. cannot split payments to yourself via LNURL.")
         return None
 
-    if invoice.amount_msat != rounded_amount:
-        logger.error(
-            f"""
-        {data['callback']} returned an invalid invoice.
-        Expected {amount_msat} msat, got {invoice.amount_msat}.
-        """
-        )
-        return None
-
-    return params["pr"]
+    return payment_request
