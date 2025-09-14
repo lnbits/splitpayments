@@ -51,8 +51,11 @@ window.app = Vue.createApp({
           '/splitpayments/api/v1/targets',
           this.selectedWallet.adminkey
         )
-        .then(response => {
-          this.targets = response.data
+        .then(res => {
+          this.targets = res.data.map(t => ({
+            ...t,
+            targetChoice: t.targetChoice || 'wallet'
+          }))
         })
         .catch(err => {
           LNbits.utils.notifyApiError(err)
@@ -63,16 +66,26 @@ window.app = Vue.createApp({
       this.getTargets()
     },
     addTarget() {
-      this.targets.push({source: this.selectedWallet})
+      this.targets.push({
+        source: this.selectedWallet,
+        targetChoice: 'wallet'
+      })
     },
     saveTargets() {
+      const payload = this.targets
+        .filter(t => t.wallet && String(t.wallet).trim() !== '')
+        .map(({alias, percent, wallet}) => ({
+          alias,
+          percent: Number(percent) || 0,
+          wallet
+        }))
       LNbits.api
         .request(
           'PUT',
           '/splitpayments/api/v1/targets',
           this.selectedWallet.adminkey,
           {
-            targets: this.targets
+            targets: payload
           }
         )
         .then(response => {

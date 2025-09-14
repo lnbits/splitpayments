@@ -38,12 +38,30 @@
               :hint="t === targets.length - 1 ? 'A name to identify this target wallet locally.' : undefined"
               style="width: 150px"
             ></q-input>
-
+            <div class="column q-mt-none">
+              <div class="col">
+                <q-radio
+                  class="float-left"
+                  v-model="target.targetChoice"
+                  val="wallet"
+                  label="wallet"
+                ></q-radio>
+              </div>
+              <div class="col">
+                <q-radio
+                  class="float-left"
+                  v-model="target.targetChoice"
+                  val="lnurl"
+                  label="lnurl"
+                ></q-radio>
+              </div>
+            </div>
             <q-input
+              v-if="target.targetChoice === 'lnurl'"
               dense
               v-model.trim="target.wallet"
               label="Target"
-              hint="A wallet ID, invoice key, LNURLp or Lightning Address."
+              hint="LNURLp or Lightning Address."
               option-label="name"
               style="width: 500px"
               new-value-mode="add-unique"
@@ -51,6 +69,19 @@
               input-debounce="0"
               emit-value
             ></q-input>
+            <q-select
+              v-if="target.targetChoice === 'wallet'"
+              class="q-pr-md q-pt-sm"
+              filled
+              dense
+              style="width: 500px"
+              v-model="target.wallet"
+              :options="g.user.walletOptions"
+              emit-value
+              map-options
+              label="Receive wallet *"
+            >
+            </q-select>
 
             <q-input
               style="width: 150px"

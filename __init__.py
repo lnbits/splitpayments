@@ -41,7 +41,7 @@ def splitpayments_start():
 __all__ = [
     "db",
     "splitpayments_ext",
-    "splitpayments_static_files",
     "splitpayments_start",
+    "splitpayments_static_files",
     "splitpayments_stop",
 ]
