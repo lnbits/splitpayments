@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import Query
 from pydantic import BaseModel
 
@@ -9,7 +7,7 @@ class Target(BaseModel):
     wallet: str
     source: str
     percent: float
-    alias: Optional[str] = None
+    alias: str | None = None
 
 
 class TargetPut(BaseModel):
