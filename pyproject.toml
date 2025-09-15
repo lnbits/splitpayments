@@ -3,18 +3,23 @@ name = "splitpayments"
 version = "1.1.1"
 requires-python = ">=3.10,<3.13"
 description = "Send incoming payments to different targets"
-authors = [{name = "benarc"}, {name = "alan"}]
+authors = [{name = "benarc"}, {name = "dni"}, {name = "alan"}]
+urls = { Homepage = "https://lnbits.com", Repository = "https://github.com/lnbits/splitpayments" }
 
 dependencies = [ "lnbits>1" ]
+
+[tool.poetry]
+package-mode = false
 
 [tool.uv]
 dev-dependencies = [
     "black",
     "pytest-asyncio",
     "pytest",
-    "mypy",
+    "mypy==1.17.1",
     "pre-commit",
     "ruff",
+    "pytest-md",
 ]
 
 [tool.mypy]
@@ -26,19 +31,6 @@ init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
-
-[[tool.mypy.overrides]]
-module = [
-  "lnbits.*",
-  "lnurl.*",
-  "loguru.*",
-  "fastapi.*",
-  "pydantic.*",
-  "pyqrcode.*",
-  "shortuuid.*",
-  "httpx.*",
-]
-ignore_missing_imports = "True"
 
 [tool.pytest.ini_options]
 log_cli = false
