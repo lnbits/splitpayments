@@ -33,9 +33,9 @@ LNbits Split Payments extension allows for distributing payments across multiple
 
 IMPORTANT:
 
-- If you split to a LNURLp or LNaddress through the LNURLp extension make sure your receipients allow comments ! Split&Scrub add a comment in your transaction - and if it is not allowed, the split/scrub will not take place.
-- Make sure the LNURLp / LNaddress of the receipient has its min-sats set very low (e.g. 1 sat). If the wallet does not belong to you you can [check with a Decoder](https://lightningdecoder.com/), if that is the case already
-- Yes, there is fees - internal and external! Updating your own wallets on your own instance will not cost any fees but sending to an external instance will. Please notice that you should therefore not split up to 100% if you send to a wallet that is external (leave 1-2% reserve for routing fees!). External fees are deducted from the individual payment percentage of the receipient
+- If you split to a LNURLp or LNaddress through the LNURLp extension make sure your recipients allow comments ! Split&Scrub add a comment in your transaction - and if it is not allowed, the split/scrub will not take place.
+- Make sure the LNURLp / LNaddress of the recipient has its min-sats set very low (e.g. 1 sat). If the wallet does not belong to you you can [check with a Decoder](https://lightningdecoder.com/), if that is the case already
+- Yes, there is fees - internal and external! Updating your own wallets on your own instance will not cost any fees but sending to an external instance will. Please notice that you should therefore not split up to 100% if you send to a wallet that is external (leave 1-2% reserve for routing fees!). External fees are deducted from the individual payment percentage of the recipient
 
 <img width="1148" alt="Bildschirm­foto 2023-05-01 um 22 14 36" src="https://user-images.githubusercontent.com/63317640/235534056-49296aeb-7295-4b4e-9f57-914a677f5ad4.png">
 <img width="1402" alt="Bildschirm­foto 2023-05-01 um 22 17 52" src="https://user-images.githubusercontent.com/63317640/235534063-b2734654-7c1a-48a3-b48e-32798c232b49.png">
