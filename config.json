@@ -1,8 +1,11 @@
 {
-  "name": "Split Payments",
-  "short_description": "Split incoming payments across wallets",
-  "tile": "/splitpayments/static/image/split-payments.png",
+  "id": "splitpayments",
   "version": "1.1.0",
+  "name": "Split Payments",
+  "repo": "https://github.com/lnbits/splitpayments",
+  "short_description": "Split incoming payments across wallets or addresses",
+  "description": "",
+  "tile": "/splitpayments/static/image/split-payments.png",
   "min_lnbits_version": "1.3.0",
   "contributors": [
     {
@@ -54,5 +57,9 @@
   ],
   "description_md": "https://raw.githubusercontent.com/lnbits/splitpayments/main/description.md",
   "terms_and_conditions_md": "https://raw.githubusercontent.com/lnbits/splitpayments/main/toc.md",
-  "license": "MIT"
+  "license": "MIT",
+  "paid_features": "",
+  "tags": ["Merchant", "Payments", "Automation"],
+  "donate": "",
+  "hidden": false
 }
