@@ -30,7 +30,7 @@ async def api_targets_set(
         targets: list[Target] = []
         for entry in target_put.targets:
 
-            if entry.wallet.find("@") < 0 and entry.wallet.find("LNURL") < 0:
+            if entry.wallet.find("@") < 0 and "lnurl" not in entry.wallet.lower():
                 wallet = await get_wallet(entry.wallet)
                 if not wallet:
                     wallet = await get_wallet_for_key(entry.wallet)
@@ -70,6 +70,8 @@ async def api_targets_set(
 
         await set_targets(source_wallet.wallet.id, targets)
 
+    except HTTPException:
+        raise
     except Exception as ex:
         logger.warning(ex)
         raise HTTPException(
