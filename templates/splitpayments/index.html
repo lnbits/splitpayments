@@ -16,9 +16,19 @@
           header-nav
           :vertical="$q.screen.lt.md"
         >
-          <q-step :name="1" title="Select Source Wallet" icon="account_balance_wallet" :done="currentStep > 1">
+          <q-step
+            :name="1"
+            title="Select Source Wallet"
+            icon="account_balance_wallet"
+            :done="currentStep > 1"
+          >
           </q-step>
-          <q-step :name="2" title="Add Targets" icon="share" :done="currentStep > 2">
+          <q-step
+            :name="2"
+            title="Add Targets"
+            icon="share"
+            :done="currentStep > 2"
+          >
           </q-step>
           <q-step :name="3" title="Review & Confirm" icon="check_circle">
           </q-step>
@@ -29,13 +39,17 @@
     <!-- Step 1: Source Wallet Selection -->
     <q-card v-show="currentStep === 1" class="step-card">
       <q-card-section class="step-section">
-        <div class="text-h4 text-weight-bold q-mb-md step-title">Select Source Wallet</div>
-        <p class="text-body1 q-mb-lg text-grey-7 step-description">Choose the wallet from which payments will be split.</p>
-        
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Select Source Wallet
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Choose the wallet from which payments will be split.
+        </p>
+
         <!-- Success Confirmation Banner -->
-        <q-banner 
+        <q-banner
           v-if="showSavedConfirmation"
-          class="bg-positive text-white q-mb-lg" 
+          class="bg-positive text-white q-mb-lg"
           rounded
           dense
         >
@@ -46,14 +60,19 @@
             Split payments successfully activated!
           </div>
           <div class="text-body2 q-mt-xs">
-            {% raw %}{{ lastSavedTargetCount }}{% endraw %} split target{% raw %}{{ lastSavedTargetCount !== 1 ? 's' : '' }}{% endraw %} configured for 
-            <strong>{% raw %}{{ selectedWallet ? selectedWallet.name : 'the selected wallet' }}{% endraw %}</strong>.
+            {% raw %}{{ lastSavedTargetCount }}{% endraw %} split target{% raw
+            %}{{ lastSavedTargetCount !== 1 ? 's' : '' }}{% endraw %} configured
+            for
+            <strong
+              >{% raw %}{{ selectedWallet ? selectedWallet.name : 'the selected
+              wallet' }}{% endraw %}</strong
+            >.
           </div>
           <template v-slot:action>
-            <q-btn 
-              flat 
-              color="white" 
-              label="Dismiss" 
+            <q-btn
+              flat
+              color="white"
+              label="Dismiss"
               @click="showSavedConfirmation = false"
               size="sm"
             />
@@ -70,10 +89,10 @@
               You need at least one wallet to configure split payments.
             </div>
           </div>
-          
+
           <div v-else class="wallet-selection">
-            <q-card 
-              v-for="wallet in g.user.wallets" 
+            <q-card
+              v-for="wallet in g.user.wallets"
               :key="wallet.id"
               flat
               bordered
@@ -82,40 +101,56 @@
               @click="selectedWallet = wallet"
             >
               <q-card-section class="row items-center q-py-md">
-                <q-radio 
-                  v-model="selectedWallet" 
-                  :val="wallet" 
+                <q-radio
+                  v-model="selectedWallet"
+                  :val="wallet"
                   color="primary"
                   size="md"
                 />
-                  <div class="row">
-                    <div class="col">
-                      <div class="text-h6 text-weight-medium">{% raw %}{{ wallet.name }}{% endraw %}</div>
-                      <div class="text-caption text-grey-6">{% raw %}{{ wallet.id }}{% endraw %}</div>
+                <div class="row">
+                  <div class="col">
+                    <div class="text-h6 text-weight-medium">
+                      {% raw %}{{ wallet.name }}{% endraw %}
                     </div>
-                    <div class="col-auto q-ml-md justify-end">
-                      <div v-if="walletSplitSummaries[wallet.id]" class="q-mt-sm">
-                        <q-chip color="green" text-color="white" size="md" icon="share" class="q-p-sm">
-                          {% raw %}{{ walletSplitSummaries[wallet.id].splitCount }}{% endraw %} split{% raw %}{{ walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' : '' }}{% endraw %} 
-                          ({% raw %}{{ walletSplitSummaries[wallet.id].totalPercent }}%{% endraw %})
-                        </q-chip>
-                      </div>
+                    <div class="text-caption text-grey-6">
+                      {% raw %}{{ wallet.id }}{% endraw %}
                     </div>
                   </div>
+                  <div class="col-auto q-ml-md justify-end">
+                    <div v-if="walletSplitSummaries[wallet.id]" class="q-mt-sm">
+                      <q-chip
+                        color="green"
+                        text-color="white"
+                        size="md"
+                        icon="share"
+                        class="q-p-sm"
+                      >
+                        {% raw %}{{ walletSplitSummaries[wallet.id].splitCount
+                        }}{% endraw %} split{% raw %}{{
+                        walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' :
+                        '' }}{% endraw %} ({% raw %}{{
+                        walletSplitSummaries[wallet.id].totalPercent }}%{%
+                        endraw %})
+                      </q-chip>
+                    </div>
+                  </div>
+                </div>
               </q-card-section>
             </q-card>
-          </div> 
-          
-          <q-banner 
+          </div>
+
+          <q-banner
             v-if="g.user.wallets.length > 0 && !selectedWallet"
-            class="bg-blue-2 text-blue-9 q-mt-md info-banner" 
+            class="bg-blue-2 text-blue-9 q-mt-md info-banner"
             rounded
             dense
           >
             <template v-slot:avatar>
               <q-icon name="info" size="sm" />
             </template>
-            <div class="text-body2 text-weight-medium">Select a source wallet to continue</div>
+            <div class="text-body2 text-weight-medium">
+              Select a source wallet to continue
+            </div>
           </q-banner>
         </q-form>
 
@@ -129,7 +164,8 @@
             class="text-weight-medium continue-button"
             no-caps
           >
-            {% raw %}{{ canProceedFromStep1 ? 'Continue' : 'Select Wallet to Continue' }}{% endraw %}
+            {% raw %}{{ canProceedFromStep1 ? 'Continue' : 'Select Wallet to
+            Continue' }}{% endraw %}
             <q-icon right name="arrow_forward" />
           </q-btn>
         </div>
@@ -139,13 +175,18 @@
     <!-- Step 2: Add Targets -->
     <q-card v-show="currentStep === 2" class="step-card">
       <q-card-section class="step-section">
-        <div class="text-h4 text-weight-bold q-mb-md step-title">Add Targets</div>
-        <p class="text-body1 q-mb-lg text-grey-7 step-description">Specify the recipients of the split payments and the percentage of the payment that each recipient will receive.</p>
-        
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Add Targets
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Specify the recipients of the split payments and the percentage of the
+          payment that each recipient will receive.
+        </p>
+
         <!-- Live Percentage Badge -->
         <div class="row items-center q-mb-md">
           <div class="items-center q-gutter-md q-mb-md">
-            <q-badge 
+            <q-badge
               :color="showPercentError ? 'negative' : showPercentWarning ? 'warning' : 'positive'"
               class="text-weight-bold q-pa-sm text-body1"
               size="lg"
@@ -153,15 +194,18 @@
               Split payments total: {% raw %}{{ totalPercent }}%{% endraw %}
             </q-badge>
             <div class="text-body1 text-weight-medium">
-              <span class="text-primary text-weight-bold">{% raw %}{{ remainingPercent }}%{% endraw %}</span> of each payment will remain in the source wallet.
+              <span class="text-primary text-weight-bold"
+                >{% raw %}{{ remainingPercent }}%{% endraw %}</span
+              >
+              of each payment will remain in the source wallet.
             </div>
           </div>
         </div>
 
         <!-- Dynamic Validation Messages -->
-        <q-banner 
+        <q-banner
           v-if="showPercentWarning && !showPercentError"
-          class="bg-warning text-dark q-mb-md" 
+          class="bg-warning text-dark q-mb-md"
           rounded
         >
           <template v-slot:avatar>
@@ -169,13 +213,15 @@
           </template>
           <div class="text-weight-medium">High percentage warning</div>
           <div class="q-mt-xs">
-            Splits totaling close to 100% may fail for some recipients due to Lightning routing fees. Consider reducing the total to 95% or less if you will be sending small payments.
+            Splits totaling close to 100% may fail for some recipients due to
+            Lightning routing fees. Consider reducing the total to 95% or less
+            if you will be sending small payments.
           </div>
         </q-banner>
 
-        <q-banner 
+        <q-banner
           v-if="showPercentError"
-          class="bg-negative text-white q-mb-md" 
+          class="bg-negative text-white q-mb-md"
           rounded
         >
           <template v-slot:avatar>
@@ -183,13 +229,14 @@
           </template>
           <div class="text-weight-medium">Percentage limit exceeded</div>
           <div class="q-mt-xs">
-            Total percentage is {% raw %}{{ totalPercent }}%{% endraw %} which exceeds 100%. Please reduce the split percentages.
+            Total percentage is {% raw %}{{ totalPercent }}%{% endraw %} which
+            exceeds 100%. Please reduce the split percentages.
           </div>
         </q-banner>
 
-        <q-banner 
+        <q-banner
           v-if="targets.length > 0 && !allTargetsValid"
-          class="bg-orange-2 text-orange-9 q-mb-md" 
+          class="bg-orange-2 text-orange-9 q-mb-md"
           rounded
         >
           <template v-slot:avatar>
@@ -197,13 +244,14 @@
           </template>
           <div class="text-weight-medium">Incomplete configuration</div>
           <div class="q-mt-xs">
-            Please complete all required fields (marked with *) before proceeding.
+            Please complete all required fields (marked with *) before
+            proceeding.
           </div>
         </q-banner>
 
-        <q-banner 
+        <q-banner
           v-if="hasDuplicateRecipients || hasDuplicateNames"
-          class="bg-negative text-white q-mb-md" 
+          class="bg-negative text-white q-mb-md"
           rounded
         >
           <template v-slot:avatar>
@@ -211,7 +259,9 @@
           </template>
           <div class="text-weight-medium">Duplicate values found</div>
           <div class="q-mt-xs">
-            <div v-if="hasDuplicateRecipients">• Each recipient address must be unique</div>
+            <div v-if="hasDuplicateRecipients">
+              • Each recipient address must be unique
+            </div>
             <div v-if="hasDuplicateNames">• Each split name must be unique</div>
           </div>
         </q-banner>
@@ -226,7 +276,10 @@
               <div class="split-number-circle">
                 {% raw %}{{ t + 1 }}{% endraw %}
               </div>
-              <span class="split-header-text">Split Recipient {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{ targets.length }}{% endraw %}</span>
+              <span class="split-header-text"
+                >Split Recipient {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{
+                targets.length }}{% endraw %}</span
+              >
               <q-btn
                 @click="clearTarget(t)"
                 size="md"
@@ -293,18 +346,20 @@
               ></q-input>
             </div>
           </div>
-          
+
           <div class="add-recipient-container q-mt-lg">
-            <q-btn 
-              icon="add" 
-              unelevated 
-              color="positive" 
+            <q-btn
+              icon="add"
+              unelevated
+              color="positive"
               @click="addTarget()"
               size="lg"
               class="text-weight-medium add-recipient-btn"
               no-caps
             >
-              <span v-if="targets.length === 0">Add a Split Payment Recipient</span>
+              <span v-if="targets.length === 0"
+                >Add a Split Payment Recipient</span
+              >
               <span v-else>Add Another Split Payment Recipient</span>
             </q-btn>
           </div>
@@ -313,7 +368,7 @@
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mt-xl">
           <div class="text-h6 q-mb-md text-weight-medium">Split Preview</div>
-          <split-payments-chart 
+          <split-payments-chart
             :split-diagram-data="splitDiagramData"
             :selected-wallet="selectedWallet"
             :remaining-percent="remainingPercent"
@@ -343,7 +398,10 @@
             no-caps
             icon="arrow_forward"
           >
-            {% raw %}{{ canProceedFromStep2 ? 'Continue' : (targets.length === 0 ? 'Add Targets to Continue' : allTargetsValid ? (totalPercent > 100 ? 'Fix Percentages to Continue' : 'Continue') : 'Complete Fields to Continue') }}{% endraw %}
+            {% raw %}{{ canProceedFromStep2 ? 'Continue' : (targets.length === 0
+            ? 'Add Targets to Continue' : allTargetsValid ? (totalPercent > 100
+            ? 'Fix Percentages to Continue' : 'Continue') : 'Complete Fields to
+            Continue') }}{% endraw %}
           </q-btn>
         </div>
       </q-card-section>
@@ -352,21 +410,30 @@
     <!-- Step 3: Review & Confirm -->
     <q-card v-show="currentStep === 3" class="step-card">
       <q-card-section class="step-section">
-        <div class="text-h4 text-weight-bold q-mb-md step-title">Review & Confirm</div>
-        <p class="text-body1 q-mb-lg text-grey-7 step-description">Review your split payment configuration and activate when ready.</p>
-        
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Review & Confirm
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Review your split payment configuration and activate when ready.
+        </p>
+
         <!-- Configuration Summary Cards -->
         <div class="summary-cards-container q-mb-lg">
           <!-- Source Wallet Card -->
           <q-card flat bordered class="summary-card summary-card-source">
             <q-card-section class="summary-card-section">
               <div class="summary-card-header">
-                <q-icon name="account_balance_wallet" size="md" class="q-mr-sm" />
+                <q-icon
+                  name="account_balance_wallet"
+                  size="md"
+                  class="q-mr-sm"
+                />
                 <span class="summary-card-title">Source Wallet</span>
               </div>
               <div class="summary-card-content">
                 <div class="summary-card-main-text">
-                  {% raw %}{{ selectedWallet ? selectedWallet.name : 'None selected' }}{% endraw %}
+                  {% raw %}{{ selectedWallet ? selectedWallet.name : 'None
+                  selected' }}{% endraw %}
                 </div>
                 <div class="summary-card-sub-text">
                   Keeps {% raw %}{{ remainingPercent }}%{% endraw %} of payments
@@ -384,10 +451,12 @@
               </div>
               <div class="summary-card-content">
                 <div class="summary-card-main-text">
-                  {% raw %}{{ targets.length }}{% endraw %} recipient{% raw %}{{ targets.length !== 1 ? 's' : '' }}{% endraw %}
+                  {% raw %}{{ targets.length }}{% endraw %} recipient{% raw %}{{
+                  targets.length !== 1 ? 's' : '' }}{% endraw %}
                 </div>
                 <div class="summary-card-sub-text">
-                  Total {% raw %}{{ totalPercent }}%{% endraw %} of payments split
+                  Total {% raw %}{{ totalPercent }}%{% endraw %} of payments
+                  split
                 </div>
               </div>
             </q-card-section>
@@ -396,10 +465,12 @@
 
         <!-- Detailed Target List -->
         <div class="detailed-targets-container q-mb-lg">
-          <div class="text-h6 q-mb-md text-weight-medium">Split Payment Summary</div>
+          <div class="text-h6 q-mb-md text-weight-medium">
+            Split Payment Summary
+          </div>
           <div class="targets-list">
-            <div 
-              v-for="(target, index) in targets" 
+            <div
+              v-for="(target, index) in targets"
               :key="index"
               class="target-summary-item"
             >
@@ -420,8 +491,10 @@
 
         <!-- Split Flow Visualization -->
         <div v-if="splitDiagramData.length > 0" class="q-mb-lg">
-          <div class="text-h6 q-mb-md text-weight-medium">Payment Flow Preview</div>
-          <split-payments-chart 
+          <div class="text-h6 q-mb-md text-weight-medium">
+            Payment Flow Preview
+          </div>
+          <split-payments-chart
             :split-diagram-data="splitDiagramData"
             :selected-wallet="selectedWallet"
             :remaining-percent="remainingPercent"
@@ -429,9 +502,9 @@
         </div>
 
         <!-- Validation Status for Step 3 -->
-        <q-banner 
+        <q-banner
           v-if="validationSummary.length > 0"
-          class="bg-negative text-white q-mb-lg" 
+          class="bg-negative text-white q-mb-lg"
           rounded
         >
           <template v-slot:avatar>
@@ -439,20 +512,31 @@
           </template>
           <div class="text-weight-medium">Configuration Issues:</div>
           <ul class="q-mt-xs q-mb-none">
-            <li v-for="error in validationSummary" :key="error">{% raw %}{{ error }}{% endraw %}</li>
+            <li v-for="error in validationSummary" :key="error">
+              {% raw %}{{ error }}{% endraw %}
+            </li>
           </ul>
         </q-banner>
 
         <!-- Important Notice -->
-        <q-banner class="bg-orange-2 text-orange-9 q-mb-lg" rounded v-if="totalPercent >= 95">
+        <q-banner
+          class="bg-orange-2 text-orange-9 q-mb-lg"
+          rounded
+          v-if="totalPercent >= 95"
+        >
           <template v-slot:avatar>
             <q-icon name="info" color="orange" />
           </template>
           <div class="text-weight-medium">Important:</div>
           <div class="q-mt-xs">
-            <p>• Splits totaling close to 100% may fail due to Lightning routing fees. Please keep this in mind when setting up splits for a wallet where small payments are common.
-              <br>
-            • Each payment to this wallet will be automatically split when it arrives</p>
+            <p>
+              • Splits totaling close to 100% may fail due to Lightning routing
+              fees. Please keep this in mind when setting up splits for a wallet
+              where small payments are common.
+              <br />
+              • Each payment to this wallet will be automatically split when it
+              arrives
+            </p>
           </div>
         </q-banner>
 
@@ -481,7 +565,8 @@
             no-caps
             icon="check_circle"
           >
-            {% raw %}{{ validationSummary.length === 0 ? 'Confirm and Activate' : 'Fix Issues to Activate' }}{% endraw %}
+            {% raw %}{{ validationSummary.length === 0 ? 'Confirm and Activate'
+            : 'Fix Issues to Activate' }}{% endraw %}
           </q-btn>
         </div>
       </q-card-section>
@@ -501,13 +586,13 @@
         <div class="text-subtitle2 q-mb-md">How splits work</div>
         <p class="text-body2">
           Add targets to split payments automatically. Every time a payment
-          arrives at the "Source Wallet", it will be split with the
-          target wallets according to their percentage.
+          arrives at the "Source Wallet", it will be split with the target
+          wallets according to their percentage.
         </p>
         <p class="text-body2">
           This works for every payment, regardless of how it was created.
         </p>
-        
+
         <div class="text-subtitle2 q-mb-md q-mt-md">Supported formats</div>
         <q-list dense>
           <q-item>
@@ -535,7 +620,7 @@
             </q-item-section>
           </q-item>
         </q-list>
-        
+
         <div class="text-subtitle2 q-mb-md q-mt-md">Requirements</div>
         <q-list dense>
           <q-item>
@@ -543,7 +628,9 @@
               <q-icon name="warning" size="sm" color="warning" />
             </q-item-section>
             <q-item-section>
-              <q-item-label caption>LNURLp must allow comments > 100 chars</q-item-label>
+              <q-item-label caption
+                >LNURLp must allow comments > 100 chars</q-item-label
+              >
             </q-item-section>
           </q-item>
           <q-item>
@@ -551,31 +638,31 @@
               <q-icon name="warning" size="sm" color="warning" />
             </q-item-section>
             <q-item-section>
-              <q-item-label caption>Receiving wallet must accept flexible amounts</q-item-label>
+              <q-item-label caption
+                >Receiving wallet must accept flexible amounts</q-item-label
+              >
             </q-item-section>
           </q-item>
         </q-list>
-        
-        <div class="text-subtitle1   q-mb-md q-mt-md">Notes on fees</div>
+
+        <div class="text-subtitle1 q-mb-md q-mt-md">Notes on fees</div>
         <p class="text-body2">
-          For each split sent to a Lightning address or LNURLp, a "Fee Reserve" is
-          subtracted to cover potential routing fees. This fee is not deducted from the
-          recipient's wallet, but from the source wallet.
+          For each split sent to a Lightning address or LNURLp, a "Fee Reserve"
+          is subtracted to cover potential routing fees. This fee is not
+          deducted from the recipient's wallet, but from the source wallet.
         </p>
         <p class="text-body2">
-          If the split total is close to 100%, the payment may fail for some recipients because of routing fees. Keep this in mind when setting up splits for a wallet where small payments are common.
+          If the split total is close to 100%, the payment may fail for some
+          recipients because of routing fees. Keep this in mind when setting up
+          splits for a wallet where small payments are common.
         </p>
       </q-card-section>
     </q-card>
   </div>
 </div>
-{% endblock %} 
-
-{% block styles %}
-<link rel="stylesheet" href="/splitpayments/static/css/index.css">
-{% endblock %}
-
-{% block scripts %} {{ window_vars(user) }}
+{% endblock %} {% block styles %}
+<link rel="stylesheet" href="/splitpayments/static/css/index.css" />
+{% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script src="/splitpayments/static/js/split-payments-chart.js"></script>
 <script src="/splitpayments/static/js/index.js"></script>
 {% endblock %}

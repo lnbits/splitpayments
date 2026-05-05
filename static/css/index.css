@@ -1,14 +1,14 @@
 .q-avatar {
-    width: 1.2em;
-    height: 1.2em;
-  }
-  .q-stepper__dot {
-    width: 42px;
-    height: 42px;
-  }
-  .q-stepper__content {
-    display: none;
-  }
+  width: 1.2em;
+  height: 1.2em;
+}
+.q-stepper__dot {
+  width: 42px;
+  height: 42px;
+}
+.q-stepper__content {
+  display: none;
+}
 .flow-chart-container {
   display: flex;
   justify-content: center;
@@ -309,7 +309,8 @@
 .summary-card-sub-text,
 .target-name,
 .target-wallet {
-  font-family: Roboto, "-apple-system", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: Roboto, '-apple-system', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
 }
 
 .summary-card {
@@ -403,7 +404,6 @@
 .body--dark .summary-card-sub-text {
   color: var(--q-color-grey-5);
 }
-
 
 .detailed-targets-container {
   margin-bottom: 24px;

@@ -22,14 +22,14 @@ window.app = Vue.createApp({
   watch: {
     selectedWallet() {
       this.getTargets()
-    },
+    }
   },
   data() {
     return {
       // Wizard state
       currentStep: 1,
       maxSteps: 3,
-      
+
       // Existing data
       selectedWallet: null,
       currentHash: '', // a string that must match if the edit data is unchanged
@@ -45,40 +45,64 @@ window.app = Vue.createApp({
       return this.selectedWallet !== null
     },
     canProceedFromStep2() {
-      return this.targets.length > 0 && this.totalPercent <= 100 && this.allTargetsValid
+      return (
+        this.targets.length > 0 &&
+        this.totalPercent <= 100 &&
+        this.allTargetsValid
+      )
     },
     totalPercent() {
-      return this.targets.reduce((sum, target) => sum + (target.percent || 0), 0)
+      return this.targets.reduce(
+        (sum, target) => sum + (target.percent || 0),
+        0
+      )
     },
     remainingPercent() {
       return Math.max(0, 100 - this.totalPercent)
     },
     allTargetsValid() {
-      return this.targets.every(target => 
-        target.wallet && target.wallet.trim() !== '' && 
-        target.percent > 0 && target.percent <= 100 &&
-        target.alias && target.alias.trim() !== '' && target.alias.trim().length <= 50
-      ) && !this.hasDuplicateRecipients && !this.hasDuplicateNames
+      return (
+        this.targets.every(
+          target =>
+            target.wallet &&
+            target.wallet.trim() !== '' &&
+            target.percent > 0 &&
+            target.percent <= 100 &&
+            target.alias &&
+            target.alias.trim() !== '' &&
+            target.alias.trim().length <= 50
+        ) &&
+        !this.hasDuplicateRecipients &&
+        !this.hasDuplicateNames
+      )
     },
     hasValidationErrors() {
-      return this.targets.some(target => 
-        !target.wallet || target.wallet.trim() === '' ||
-        !target.alias || target.alias.trim() === '' ||
-        target.percent <= 0 || target.percent > 100
-      ) || this.hasDuplicateRecipients || this.hasDuplicateNames
+      return (
+        this.targets.some(
+          target =>
+            !target.wallet ||
+            target.wallet.trim() === '' ||
+            !target.alias ||
+            target.alias.trim() === '' ||
+            target.percent <= 0 ||
+            target.percent > 100
+        ) ||
+        this.hasDuplicateRecipients ||
+        this.hasDuplicateNames
+      )
     },
     hasDuplicateRecipients() {
       const walletAddresses = this.targets
         .filter(target => target.wallet && target.wallet.trim() !== '')
         .map(target => target.wallet.trim().toLowerCase())
-      
+
       return walletAddresses.length !== new Set(walletAddresses).size
     },
     hasDuplicateNames() {
       const splitNames = this.targets
         .filter(target => target.alias && target.alias.trim() !== '')
         .map(target => target.alias.trim().toLowerCase())
-      
+
       return splitNames.length !== new Set(splitNames).size
     },
     validationSummary() {
@@ -90,12 +114,20 @@ window.app = Vue.createApp({
         errors.push(`Total percentage (${this.totalPercent}%) exceeds 100%`)
       }
       if (this.hasDuplicateRecipients) {
-        errors.push('Duplicate recipient addresses found - each recipient must be unique')
+        errors.push(
+          'Duplicate recipient addresses found - each recipient must be unique'
+        )
       }
       if (this.hasDuplicateNames) {
-        errors.push('Duplicate split names found - each split name must be unique')
+        errors.push(
+          'Duplicate split names found - each split name must be unique'
+        )
       }
-      if (this.hasValidationErrors && !this.hasDuplicateRecipients && !this.hasDuplicateNames) {
+      if (
+        this.hasValidationErrors &&
+        !this.hasDuplicateRecipients &&
+        !this.hasDuplicateNames
+      ) {
         errors.push('Some fields have validation errors')
       }
       return errors
@@ -109,7 +141,7 @@ window.app = Vue.createApp({
     // Split diagram data
     splitDiagramData() {
       const data = []
-      
+
       // Add target wallets
       this.targets.forEach(target => {
         if (target.percent > 0 && target.alias) {
@@ -121,9 +153,10 @@ window.app = Vue.createApp({
           })
         }
       })
-      
+
       // Add source wallet (remaining percentage or 100% if no targets)
-      const remainingPercent = this.targets.length > 0 ? this.remainingPercent : 100
+      const remainingPercent =
+        this.targets.length > 0 ? this.remainingPercent : 100
       if (remainingPercent > 0) {
         data.push({
           name: this.selectedWallet ? this.selectedWallet.name : 'Source',
@@ -132,23 +165,26 @@ window.app = Vue.createApp({
           color: '#1976d2'
         })
       }
-      
+
       return data.sort((a, b) => b.percent - a.percent)
     },
     isDirty() {
       return hashTargets(this.targets) !== this.currentHash
     },
-    
+
     // Get split summaries for all wallets
     walletSplitSummaries() {
       const summaries = {}
-      
+
       for (const walletId in this.walletSplits) {
         const splits = this.walletSplits[walletId]
         if (splits && splits.length > 0) {
-          const totalPercent = splits.reduce((sum, split) => sum + (split.percent || 0), 0)
+          const totalPercent = splits.reduce(
+            (sum, split) => sum + (split.percent || 0),
+            0
+          )
           const remainingPercent = Math.max(0, 100 - totalPercent)
-          
+
           summaries[walletId] = {
             totalPercent,
             remainingPercent,
@@ -157,7 +193,7 @@ window.app = Vue.createApp({
           }
         }
       }
-      
+
       return summaries
     }
   },
@@ -187,47 +223,50 @@ window.app = Vue.createApp({
         this.scrollToTop()
       }
     },
-    
+
     // Scroll to top of wizard
     scrollToTop() {
       this.$nextTick(() => {
         // Find the wizard container (the stepper card)
-        const wizardElement = document.querySelector('.q-stepper') || document.querySelector('.q-card')
+        const wizardElement =
+          document.querySelector('.q-stepper') ||
+          document.querySelector('.q-card')
         if (wizardElement) {
-          wizardElement.scrollIntoView({ 
-            behavior: 'smooth', 
+          wizardElement.scrollIntoView({
+            behavior: 'smooth',
             block: 'start',
-            inline: 'nearest' 
+            inline: 'nearest'
           })
         } else {
           // Fallback to window scroll
-          window.scrollTo({ 
-            top: 0, 
-            behavior: 'smooth' 
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
           })
         }
       })
     },
-    
+
     // Validation helper methods
     isDuplicateRecipient(index) {
       const currentWallet = this.targets[index]?.wallet?.trim().toLowerCase()
       if (!currentWallet) return false
-      
-      return this.targets.some((target, i) => 
-        i !== index && target.wallet?.trim().toLowerCase() === currentWallet
+
+      return this.targets.some(
+        (target, i) =>
+          i !== index && target.wallet?.trim().toLowerCase() === currentWallet
       )
     },
     isDuplicateName(index) {
       const currentName = this.targets[index]?.alias?.trim().toLowerCase()
       if (!currentName) return false
-      
-      return this.targets.some((target, i) => 
-        i !== index && target.alias?.trim().toLowerCase() === currentName
+
+      return this.targets.some(
+        (target, i) =>
+          i !== index && target.alias?.trim().toLowerCase() === currentName
       )
     },
-    
-    
+
     // Target management methods
     clearTarget(index) {
       if (this.targets.length == 1) {
@@ -329,7 +368,8 @@ window.app = Vue.createApp({
         .catch(err => {
           LNbits.utils.notifyApiError(err)
           Quasar.Notify.create({
-            message: 'Failed to save split payment configuration. Please try again.',
+            message:
+              'Failed to save split payment configuration. Please try again.',
             timeout: 5000,
             color: 'negative',
             icon: 'error'
@@ -358,10 +398,10 @@ window.app = Vue.createApp({
             })
         })
     },
-    
+
     async checkExistingConfigurations() {
       let firstWalletWithSplits = null
-      
+
       // Check each wallet for existing split payment configurations
       for (const wallet of this.g.user.wallets) {
         try {
@@ -373,7 +413,7 @@ window.app = Vue.createApp({
           if (response.data && response.data.length > 0) {
             // Store split data for this wallet
             this.walletSplits[wallet.id] = response.data
-            
+
             // Remember the first wallet with splits
             if (!firstWalletWithSplits) {
               firstWalletWithSplits = wallet
@@ -384,7 +424,7 @@ window.app = Vue.createApp({
           continue
         }
       }
-      
+
       // Select first wallet with splits, or first wallet if none have splits
       if (firstWalletWithSplits) {
         this.selectedWallet = firstWalletWithSplits
@@ -396,5 +436,5 @@ window.app = Vue.createApp({
   },
   mounted() {
     this.checkExistingConfigurations()
-  },
+  }
 })
