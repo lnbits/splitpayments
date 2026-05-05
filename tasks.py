@@ -1,6 +1,5 @@
 import asyncio
 from math import floor
-from typing import Optional
 
 import bolt11
 from lnbits.core.crud import get_standalone_payment
@@ -100,7 +99,7 @@ async def pay_invoice_in_background(payment_request, wallet_id, description, ext
 
 async def get_lnurl_invoice(
     payoraddress: str, wallet_id: str, amount_msat: int, memo: str
-) -> Optional[str]:
+) -> str | None:
 
     rounded_amount = floor(amount_msat / 1000) * 1000
 
