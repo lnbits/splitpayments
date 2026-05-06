@@ -337,7 +337,11 @@ window.app = Vue.createApp({
           '/splitpayments/api/v1/targets',
           this.selectedWallet.adminkey,
           {
-            targets: payload
+            targets: this.targets.map(({wallet, percent, alias}) => ({
+              wallet: wallet.trim(),
+              percent,
+              alias: alias.trim()
+            }))
           }
         )
         .then(response => {
