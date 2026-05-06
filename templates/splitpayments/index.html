@@ -60,13 +60,14 @@
             Split payments successfully activated!
           </div>
           <div class="text-body2 q-mt-xs">
-            {% raw %}{{ lastSavedTargetCount }}{% endraw %} split target{% raw
-            %}{{ lastSavedTargetCount !== 1 ? 's' : '' }}{% endraw %} configured
-            for
-            <strong
-              >{% raw %}{{ selectedWallet ? selectedWallet.name : 'the selected
-              wallet' }}{% endraw %}</strong
-            >.
+            <span
+              v-text="`${lastSavedTargetCount} split target ${lastSavedTargetCount !== 1 ? 's' : ''} configured for `"
+            ></span>
+            <span
+              class="text-bold"
+              v-text="selectedWallet ? selectedWallet.name : 'the selected wallet'"
+            ></span>
+            .
           </div>
           <template v-slot:action>
             <q-btn
@@ -110,10 +111,10 @@
                 <div class="row">
                   <div class="col">
                     <div class="text-h6 text-weight-medium">
-                      {% raw %}{{ wallet.name }}{% endraw %}
+                      <span v-text="wallet.name"></span>
                     </div>
                     <div class="text-caption text-grey-6">
-                      {% raw %}{{ wallet.id }}{% endraw %}
+                      <span v-text="wallet.id"></span>
                     </div>
                   </div>
                   <div class="col-auto q-ml-md justify-end">
@@ -125,12 +126,9 @@
                         icon="share"
                         class="q-p-sm"
                       >
-                        {% raw %}{{ walletSplitSummaries[wallet.id].splitCount
-                        }}{% endraw %} split{% raw %}{{
-                        walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' :
-                        '' }}{% endraw %} ({% raw %}{{
-                        walletSplitSummaries[wallet.id].totalPercent }}%{%
-                        endraw %})
+                        <span
+                          v-text="`${walletSplitSummaries[wallet.id].splitCount} split${walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' : ''} (${walletSplitSummaries[wallet.id].totalPercent}%)`"
+                        ></span>
                       </q-chip>
                     </div>
                   </div>
@@ -163,10 +161,10 @@
             size="lg"
             class="text-weight-medium continue-button"
             no-caps
+            :label="canProceedFromStep1 ? 'Continue' : 'Select Wallet to Continue'"
+            icon="arrow_forward"
+            :icon-right="true"
           >
-            {% raw %}{{ canProceedFromStep1 ? 'Continue' : 'Select Wallet to
-            Continue' }}{% endraw %}
-            <q-icon right name="arrow_forward" />
           </q-btn>
         </div>
       </q-card-section>
@@ -190,14 +188,14 @@
               :color="showPercentError ? 'negative' : showPercentWarning ? 'warning' : 'positive'"
               class="text-weight-bold q-pa-sm text-body1"
               size="lg"
+              :label="`Split payments total: ${totalPercent}%`"
             >
-              Split payments total: {% raw %}{{ totalPercent }}%{% endraw %}
             </q-badge>
             <div class="text-body1 text-weight-medium">
-              <span class="text-primary text-weight-bold"
-                >{% raw %}{{ remainingPercent }}%{% endraw %}</span
-              >
-              of each payment will remain in the source wallet.
+              <span
+                class="text-primary text-weight-bold"
+                v-text="`${remainingPercent}% of each payment will remain in the source wallet`"
+              ></span>
             </div>
           </div>
         </div>
@@ -229,8 +227,9 @@
           </template>
           <div class="text-weight-medium">Percentage limit exceeded</div>
           <div class="q-mt-xs">
-            Total percentage is {% raw %}{{ totalPercent }}%{% endraw %} which
-            exceeds 100%. Please reduce the split percentages.
+            <span
+              v-text="`Total percentage is ${totalPercent}% which exceeds 100%. Please reduce the split percentages.`"
+            ></span>
           </div>
         </q-banner>
 
@@ -274,12 +273,13 @@
           >
             <div class="split-recipient-header q-mb-md">
               <div class="split-number-circle">
-                {% raw %}{{ t + 1 }}{% endraw %}
+                <span></span>
+                <span v-text="t + 1"></span>
               </div>
-              <span class="split-header-text"
-                >Split Recipient {% raw %}{{ t + 1 }}{% endraw %} of {% raw %}{{
-                targets.length }}{% endraw %}</span
-              >
+              <span
+                class="split-header-text"
+                v-text="`Split Recipient ${t + 1} of ${targets.length}`"
+              ></span>
               <q-btn
                 @click="clearTarget(t)"
                 size="md"
@@ -356,11 +356,8 @@
               size="lg"
               class="text-weight-medium add-recipient-btn"
               no-caps
+              :label="targets.length === 0 ? 'Add a Split Payment Recipient' : 'Add Another Split Payment Recipient'"
             >
-              <span v-if="targets.length === 0"
-                >Add a Split Payment Recipient</span
-              >
-              <span v-else>Add Another Split Payment Recipient</span>
             </q-btn>
           </div>
         </q-form>
@@ -397,11 +394,8 @@
             class="text-weight-medium continue-button"
             no-caps
             icon="arrow_forward"
+            :label="canProceedFromStep2 ? 'Continue' : (targets.length === 0 ? 'Add Targets to Continue' : allTargetsValid ? (totalPercent > 100 ? 'Fix Percentages to Continue' : 'Continue') : 'Complete Fields to Continue')"
           >
-            {% raw %}{{ canProceedFromStep2 ? 'Continue' : (targets.length === 0
-            ? 'Add Targets to Continue' : allTargetsValid ? (totalPercent > 100
-            ? 'Fix Percentages to Continue' : 'Continue') : 'Complete Fields to
-            Continue') }}{% endraw %}
           </q-btn>
         </div>
       </q-card-section>
@@ -432,11 +426,14 @@
               </div>
               <div class="summary-card-content">
                 <div class="summary-card-main-text">
-                  {% raw %}{{ selectedWallet ? selectedWallet.name : 'None
-                  selected' }}{% endraw %}
+                  <span
+                    v-text="selectedWallet ? selectedWallet.name : 'None selected'"
+                  ></span>
                 </div>
                 <div class="summary-card-sub-text">
-                  Keeps {% raw %}{{ remainingPercent }}%{% endraw %} of payments
+                  <span
+                    v-text="`Keeps ${remainingPercent}% of payments`"
+                  ></span>
                 </div>
               </div>
             </q-card-section>
@@ -451,12 +448,14 @@
               </div>
               <div class="summary-card-content">
                 <div class="summary-card-main-text">
-                  {% raw %}{{ targets.length }}{% endraw %} recipient{% raw %}{{
-                  targets.length !== 1 ? 's' : '' }}{% endraw %}
+                  <span
+                    v-text="`${targets.length} recipient${targets.length !==1 ? 's': ''}`"
+                  ></span>
                 </div>
                 <div class="summary-card-sub-text">
-                  Total {% raw %}{{ totalPercent }}%{% endraw %} of payments
-                  split
+                  <span
+                    v-text="`Total ${totalPercent}% of payments split`"
+                  ></span>
                 </div>
               </div>
             </q-card-section>
@@ -475,14 +474,14 @@
               class="target-summary-item"
             >
               <div class="target-percent-circle">
-                {% raw %}{{ target.percent }}%{% endraw %}
+                <span v-text="`${target.percent}%`"></span>
               </div>
               <div class="target-info">
                 <div class="target-name">
-                  {% raw %}{{ target.alias }}{% endraw %}
+                  <span v-text="target.alias"></span>
                 </div>
                 <div class="target-wallet">
-                  {% raw %}{{ target.wallet }}{% endraw %}
+                  <span v-text="target.wallet"></span>
                 </div>
               </div>
             </div>
@@ -513,7 +512,7 @@
           <div class="text-weight-medium">Configuration Issues:</div>
           <ul class="q-mt-xs q-mb-none">
             <li v-for="error in validationSummary" :key="error">
-              {% raw %}{{ error }}{% endraw %}
+              <span v-text="error"></span>
             </li>
           </ul>
         </q-banner>
@@ -564,9 +563,8 @@
             class="text-weight-bold confirm-button"
             no-caps
             icon="check_circle"
+            :label="validationSummary.length === 0 ? 'Confirm and Activate' : 'Fix Issues to Activate'"
           >
-            {% raw %}{{ validationSummary.length === 0 ? 'Confirm and Activate'
-            : 'Fix Issues to Activate' }}{% endraw %}
           </q-btn>
         </div>
       </q-card-section>
