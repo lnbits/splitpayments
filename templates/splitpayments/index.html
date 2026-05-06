@@ -2,132 +2,576 @@
 %} {% block page %}
 <div class="row q-col-gutter-md">
   <div class="col-12 col-md-8 q-gutter-y-md">
-    <q-card class="q-pa-sm col-5">
-      <q-card-section class="q-pa-none text-center">
-        <q-form class="q-gutter-md">
-          <q-select
-            filled
-            dense
-            :options="g.user.wallets"
-            v-model="selectedWallet"
-            label="Source Wallet:"
-            option-label="name"
+    <!-- Wizard Header -->
+    <q-card class="q-pa-md">
+      <q-card-section class="q-pa-none">
+        <div class="text-h6 q-mb-md">Configure Split Payment</div>
+        <q-stepper
+          v-model="currentStep"
+          ref="stepper"
+          color="primary"
+          animated
+          flat
+          keep-alive
+          header-nav
+          :vertical="$q.screen.lt.md"
+        >
+          <q-step
+            :name="1"
+            title="Select Source Wallet"
+            icon="account_balance_wallet"
+            :done="currentStep > 1"
           >
-          </q-select>
-        </q-form>
+          </q-step>
+          <q-step
+            :name="2"
+            title="Add Targets"
+            icon="share"
+            :done="currentStep > 2"
+          >
+          </q-step>
+          <q-step :name="3" title="Review & Confirm" icon="check_circle">
+          </q-step>
+        </q-stepper>
       </q-card-section>
     </q-card>
 
-    <q-card class="q-pa-sm col-5">
-      <q-card-section class="q-pa-none text-center">
-        <div class="col">
-          <h5 class="text-subtitle1 q-my-none">Target Wallets</h5>
+    <!-- Step 1: Source Wallet Selection -->
+    <q-card v-show="currentStep === 1" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Select Source Wallet
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Choose the wallet from which payments will be split.
+        </p>
+
+        <!-- Success Confirmation Banner -->
+        <q-banner
+          v-if="showSavedConfirmation"
+          class="bg-positive text-white q-mb-lg"
+          rounded
+          dense
+        >
+          <template v-slot:avatar>
+            <q-icon name="check_circle" size="md" />
+          </template>
+          <div class="text-body1 text-weight-medium">
+            Split payments successfully activated!
+          </div>
+          <div class="text-body2 q-mt-xs">
+            <span
+              v-text="`${lastSavedTargetCount} split target ${lastSavedTargetCount !== 1 ? 's' : ''} configured for `"
+            ></span>
+            <span
+              class="text-bold"
+              v-text="selectedWallet ? selectedWallet.name : 'the selected wallet'"
+            ></span>
+            .
+          </div>
+          <template v-slot:action>
+            <q-btn
+              flat
+              color="white"
+              label="Dismiss"
+              @click="showSavedConfirmation = false"
+              size="sm"
+            />
+          </template>
+        </q-banner>
+
+        <q-form class="q-gutter-md">
+          <div v-if="g.user.wallets.length === 0" class="text-center q-py-xl">
+            <q-icon name="account_balance_wallet" size="64px" color="grey-5" />
+            <div class="text-h6 text-grey-6 q-mt-md q-mb-sm">
+              No wallets available
+            </div>
+            <div class="text-body1 text-grey-6">
+              You need at least one wallet to configure split payments.
+            </div>
+          </div>
+
+          <div v-else class="wallet-selection">
+            <q-card
+              v-for="wallet in g.user.wallets"
+              :key="wallet.id"
+              flat
+              bordered
+              class="wallet-option q-mb-md"
+              :class="{ 'selected': selectedWallet === wallet }"
+              @click="selectedWallet = wallet"
+            >
+              <q-card-section class="row items-center q-py-md">
+                <q-radio
+                  v-model="selectedWallet"
+                  :val="wallet"
+                  color="primary"
+                  size="md"
+                />
+                <div class="row">
+                  <div class="col">
+                    <div class="text-h6 text-weight-medium">
+                      <span v-text="wallet.name"></span>
+                    </div>
+                    <div class="text-caption text-grey-6">
+                      <span v-text="wallet.id"></span>
+                    </div>
+                  </div>
+                  <div class="col-auto q-ml-md justify-end">
+                    <div v-if="walletSplitSummaries[wallet.id]" class="q-mt-sm">
+                      <q-chip
+                        color="green"
+                        text-color="white"
+                        size="md"
+                        icon="share"
+                        class="q-p-sm"
+                      >
+                        <span
+                          v-text="`${walletSplitSummaries[wallet.id].splitCount} split${walletSplitSummaries[wallet.id].splitCount !== 1 ? 's' : ''} (${walletSplitSummaries[wallet.id].totalPercent}%)`"
+                        ></span>
+                      </q-chip>
+                    </div>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+
+          <q-banner
+            v-if="g.user.wallets.length > 0 && !selectedWallet"
+            class="bg-blue-2 text-blue-9 q-mt-md info-banner"
+            rounded
+            dense
+          >
+            <template v-slot:avatar>
+              <q-icon name="info" size="sm" />
+            </template>
+            <div class="text-body2 text-weight-medium">
+              Select a source wallet to continue
+            </div>
+          </q-banner>
+        </q-form>
+
+        <div class="continue-button-container q-mt-xl">
+          <q-btn
+            unelevated
+            :color="canProceedFromStep1 ? 'primary' : 'grey-5'"
+            @click="nextStep()"
+            :disabled="!canProceedFromStep1"
+            size="lg"
+            class="text-weight-medium continue-button"
+            no-caps
+            :label="canProceedFromStep1 ? 'Continue' : 'Select Wallet to Continue'"
+            icon="arrow_forward"
+            :icon-right="true"
+          >
+          </q-btn>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <!-- Step 2: Add Targets -->
+    <q-card v-show="currentStep === 2" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Add Targets
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Specify the recipients of the split payments and the percentage of the
+          payment that each recipient will receive.
+        </p>
+
+        <!-- Live Percentage Badge -->
+        <div class="row items-center q-mb-md">
+          <div class="items-center q-gutter-md q-mb-md">
+            <q-badge
+              :color="showPercentError ? 'negative' : showPercentWarning ? 'warning' : 'positive'"
+              class="text-weight-bold q-pa-sm text-body1"
+              size="lg"
+              :label="`Split payments total: ${totalPercent}%`"
+            >
+            </q-badge>
+            <div class="text-body1 text-weight-medium">
+              <span
+                class="text-primary text-weight-bold"
+                v-text="`${remainingPercent}% of each payment will remain in the source wallet`"
+              ></span>
+            </div>
+          </div>
         </div>
 
-        <q-form class="q-gutter-md" @submit="saveTargets">
-          <div
-            class="q-gutter-md row items-start"
-            style="flex-wrap: nowrap"
-            v-for="(target, t) in targets"
-          >
-            <q-input
-              dense
-              outlined
-              v-model.trim="target.alias"
-              label="Alias"
-              :hint="t === targets.length - 1 ? 'A name to identify this target wallet locally.' : undefined"
-              style="width: 150px"
-            ></q-input>
-            <div class="column q-mt-none">
-              <div class="col">
-                <q-radio
-                  class="float-left"
-                  v-model="target.targetChoice"
-                  val="wallet"
-                  label="wallet"
-                ></q-radio>
-              </div>
-              <div class="col">
-                <q-radio
-                  class="float-left"
-                  v-model="target.targetChoice"
-                  val="lnurl"
-                  label="lnurl"
-                ></q-radio>
-              </div>
-            </div>
-            <q-input
-              v-if="target.targetChoice === 'lnurl'"
-              dense
-              v-model.trim="target.wallet"
-              label="Target"
-              hint="LNURLp or Lightning Address."
-              option-label="name"
-              style="width: 500px"
-              new-value-mode="add-unique"
-              use-input
-              input-debounce="0"
-              emit-value
-            ></q-input>
-            <q-select
-              v-if="target.targetChoice === 'wallet'"
-              class="q-pr-md q-pt-sm"
-              filled
-              dense
-              style="width: 500px"
-              v-model="target.wallet"
-              :options="g.user.walletOptions"
-              emit-value
-              map-options
-              label="Receive wallet *"
-            >
-            </q-select>
-
-            <q-input
-              style="width: 150px"
-              dense
-              outlined
-              v-model.number="target.percent"
-              label="split"
-              suffix="%"
-            ></q-input>
-
-            <q-btn
-              @click="clearTarget(t)"
-              round
-              color="red"
-              size="9px"
-              icon="close"
-            ></q-btn>
+        <!-- Dynamic Validation Messages -->
+        <q-banner
+          v-if="showPercentWarning && !showPercentError"
+          class="bg-warning text-dark q-mb-md"
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="warning" />
+          </template>
+          <div class="text-weight-medium">High percentage warning</div>
+          <div class="q-mt-xs">
+            Splits totaling close to 100% may fail for some recipients due to
+            Lightning routing fees. Consider reducing the total to 95% or less
+            if you will be sending small payments.
           </div>
-          <div class="row justify-evenly q-pa-lg">
-            <div>
-              <q-btn icon="add" unelevated color="green" @click="addTarget()">
-                Add Target
-              </q-btn>
+        </q-banner>
+
+        <q-banner
+          v-if="showPercentError"
+          class="bg-negative text-white q-mb-md"
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="error" />
+          </template>
+          <div class="text-weight-medium">Percentage limit exceeded</div>
+          <div class="q-mt-xs">
+            <span
+              v-text="`Total percentage is ${totalPercent}% which exceeds 100%. Please reduce the split percentages.`"
+            ></span>
+          </div>
+        </q-banner>
+
+        <q-banner
+          v-if="targets.length > 0 && !allTargetsValid"
+          class="bg-orange-2 text-orange-9 q-mb-md"
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="info" />
+          </template>
+          <div class="text-weight-medium">Incomplete configuration</div>
+          <div class="q-mt-xs">
+            Please complete all required fields (marked with *) before
+            proceeding.
+          </div>
+        </q-banner>
+
+        <q-banner
+          v-if="hasDuplicateRecipients || hasDuplicateNames"
+          class="bg-negative text-white q-mb-md"
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="error" />
+          </template>
+          <div class="text-weight-medium">Duplicate values found</div>
+          <div class="q-mt-xs">
+            <div v-if="hasDuplicateRecipients">
+              • Each recipient address must be unique
             </div>
-            <div>
-              <q-btn unelevated @click="deleteTargets()" color="red">
-                Delete all Targets
+            <div v-if="hasDuplicateNames">• Each split name must be unique</div>
+          </div>
+        </q-banner>
+
+        <q-form>
+          <div
+            v-for="(target, t) in targets"
+            :key="t"
+            class="split-recipient-container q-mb-lg"
+          >
+            <div class="split-recipient-header q-mb-md">
+              <div class="split-number-circle">
+                <span></span>
+                <span v-text="t + 1"></span>
+              </div>
+              <span
+                class="split-header-text"
+                v-text="`Split Recipient ${t + 1} of ${targets.length}`"
+              ></span>
+              <q-btn
+                @click="clearTarget(t)"
+                size="md"
+                icon="close"
+                color="red"
+                text-color="white"
+                negative
+                class="remove-btn"
+                label="Remove"
+              >
+                <q-tooltip>Remove this recipient</q-tooltip>
               </q-btn>
             </div>
 
-            <div>
-              <q-btn
-                unelevated
-                color="primary"
-                type="submit"
-                :disabled="targets.length < 1"
-              >
-                Save Targets
-              </q-btn>
+            <div class="split-fields">
+              <q-input
+                outlined
+                v-model.trim="target.alias"
+                label="Split Name *"
+                hint="A name to identify this split recipient"
+                class="split-field q-mb-md"
+                :error="(target.alias && target.alias.trim() === '') || isDuplicateName(t)"
+                :error-message="isDuplicateName(t) ? 'This split name is already used' : 'Split name is required'"
+                :rules="[
+                  val => (val && val.trim().length > 0) || 'Split name is required',
+                  val => (val && val.trim().length <= 50) || 'Split name must be 50 characters or less',
+                  val => !isDuplicateName(t) || 'This split name is already used'
+                ]"
+              ></q-input>
+
+              <q-input
+                outlined
+                v-model.trim="target.wallet"
+                label="Split Recipient *"
+                hint="Lightning Address, LNbits wallet ID, or LNURLp string"
+                class="split-field q-mb-md"
+                :error="(target.wallet && target.wallet.trim() === '') || isDuplicateRecipient(t)"
+                :error-message="isDuplicateRecipient(t) ? 'This recipient address is already used' : 'Recipient address is required'"
+                :rules="[
+                  val => (val && val.trim().length > 0) || 'Recipient address is required',
+                  val => !val || val.includes('@') || val.includes('lnurl') || val.length >= 20 || 'Please enter a valid Lightning address, LNbits wallet ID, or LNURLp string',
+                  val => !isDuplicateRecipient(t) || 'This recipient address is already used'
+                ]"
+              ></q-input>
+
+              <q-input
+                outlined
+                v-model.number="target.percent"
+                label="Split % *"
+                hint="Percentage of payment"
+                suffix="%"
+                class="split-field q-mb-md"
+                type="number"
+                min="0.1"
+                max="100"
+                step="0.1"
+                :error="target.percent <= 0 || target.percent > 100"
+                error-message="Must be between 0.1% and 100%"
+                :rules="[
+                  val => val > 0 || 'Percentage must be greater than 0',
+                  val => val <= 100 || 'Percentage cannot exceed 100%',
+                  val => (val * 10) % 1 === 0 || 'Maximum 1 decimal place allowed'
+                ]"
+              ></q-input>
             </div>
+          </div>
+
+          <div class="add-recipient-container q-mt-lg">
+            <q-btn
+              icon="add"
+              unelevated
+              color="positive"
+              @click="addTarget()"
+              size="lg"
+              class="text-weight-medium add-recipient-btn"
+              no-caps
+              :label="targets.length === 0 ? 'Add a Split Payment Recipient' : 'Add Another Split Payment Recipient'"
+            >
+            </q-btn>
           </div>
         </q-form>
+
+        <!-- Split Flow Visualization -->
+        <div v-if="splitDiagramData.length > 0" class="q-mt-xl">
+          <div class="text-h6 q-mb-md text-weight-medium">Split Preview</div>
+          <split-payments-chart
+            :split-diagram-data="splitDiagramData"
+            :selected-wallet="selectedWallet"
+            :remaining-percent="remainingPercent"
+          />
+        </div>
+
+        <div class="step-navigation q-mt-xl">
+          <q-btn
+            unelevated
+            color="grey-7"
+            text-color="white"
+            @click="prevStep()"
+            size="lg"
+            class="text-weight-medium back-button"
+            no-caps
+            icon="arrow_back"
+            label="Back"
+          >
+          </q-btn>
+          <q-btn
+            unelevated
+            :color="canProceedFromStep2 ? 'primary' : 'grey-5'"
+            @click="nextStep()"
+            :disabled="!canProceedFromStep2"
+            size="lg"
+            class="text-weight-medium continue-button"
+            no-caps
+            icon="arrow_forward"
+            :label="canProceedFromStep2 ? 'Continue' : (targets.length === 0 ? 'Add Targets to Continue' : allTargetsValid ? (totalPercent > 100 ? 'Fix Percentages to Continue' : 'Continue') : 'Complete Fields to Continue')"
+          >
+          </q-btn>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <!-- Step 3: Review & Confirm -->
+    <q-card v-show="currentStep === 3" class="step-card">
+      <q-card-section class="step-section">
+        <div class="text-h4 text-weight-bold q-mb-md step-title">
+          Review & Confirm
+        </div>
+        <p class="text-body1 q-mb-lg text-grey-7 step-description">
+          Review your split payment configuration and activate when ready.
+        </p>
+
+        <!-- Configuration Summary Cards -->
+        <div class="summary-cards-container q-mb-lg">
+          <!-- Source Wallet Card -->
+          <q-card flat bordered class="summary-card summary-card-source">
+            <q-card-section class="summary-card-section">
+              <div class="summary-card-header">
+                <q-icon
+                  name="account_balance_wallet"
+                  size="md"
+                  class="q-mr-sm"
+                />
+                <span class="summary-card-title">Source Wallet</span>
+              </div>
+              <div class="summary-card-content">
+                <div class="summary-card-main-text">
+                  <span
+                    v-text="selectedWallet ? selectedWallet.name : 'None selected'"
+                  ></span>
+                </div>
+                <div class="summary-card-sub-text">
+                  <span
+                    v-text="`Keeps ${remainingPercent}% of payments`"
+                  ></span>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+
+          <!-- Splits Summary Card -->
+          <q-card flat bordered class="summary-card summary-card-targets">
+            <q-card-section class="summary-card-section">
+              <div class="summary-card-header">
+                <q-icon name="share" size="md" class="q-mr-sm" />
+                <span class="summary-card-title">Split Targets</span>
+              </div>
+              <div class="summary-card-content">
+                <div class="summary-card-main-text">
+                  <span
+                    v-text="`${targets.length} recipient${targets.length !==1 ? 's': ''}`"
+                  ></span>
+                </div>
+                <div class="summary-card-sub-text">
+                  <span
+                    v-text="`Total ${totalPercent}% of payments split`"
+                  ></span>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <!-- Detailed Target List -->
+        <div class="detailed-targets-container q-mb-lg">
+          <div class="text-h6 q-mb-md text-weight-medium">
+            Split Payment Summary
+          </div>
+          <div class="targets-list">
+            <div
+              v-for="(target, index) in targets"
+              :key="index"
+              class="target-summary-item"
+            >
+              <div class="target-percent-circle">
+                <span v-text="`${target.percent}%`"></span>
+              </div>
+              <div class="target-info">
+                <div class="target-name">
+                  <span v-text="target.alias"></span>
+                </div>
+                <div class="target-wallet">
+                  <span v-text="target.wallet"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Split Flow Visualization -->
+        <div v-if="splitDiagramData.length > 0" class="q-mb-lg">
+          <div class="text-h6 q-mb-md text-weight-medium">
+            Payment Flow Preview
+          </div>
+          <split-payments-chart
+            :split-diagram-data="splitDiagramData"
+            :selected-wallet="selectedWallet"
+            :remaining-percent="remainingPercent"
+          />
+        </div>
+
+        <!-- Validation Status for Step 3 -->
+        <q-banner
+          v-if="validationSummary.length > 0"
+          class="bg-negative text-white q-mb-lg"
+          rounded
+        >
+          <template v-slot:avatar>
+            <q-icon name="error" />
+          </template>
+          <div class="text-weight-medium">Configuration Issues:</div>
+          <ul class="q-mt-xs q-mb-none">
+            <li v-for="error in validationSummary" :key="error">
+              <span v-text="error"></span>
+            </li>
+          </ul>
+        </q-banner>
+
+        <!-- Important Notice -->
+        <q-banner
+          class="bg-orange-2 text-orange-9 q-mb-lg"
+          rounded
+          v-if="totalPercent >= 95"
+        >
+          <template v-slot:avatar>
+            <q-icon name="info" color="orange" />
+          </template>
+          <div class="text-weight-medium">Important:</div>
+          <div class="q-mt-xs">
+            <p>
+              • Splits totaling close to 100% may fail due to Lightning routing
+              fees. Please keep this in mind when setting up splits for a wallet
+              where small payments are common.
+              <br />
+              • Each payment to this wallet will be automatically split when it
+              arrives
+            </p>
+          </div>
+        </q-banner>
+
+        <!-- Action Buttons -->
+        <div class="step-navigation step-3-navigation q-mt-xl">
+          <q-btn
+            unelevated
+            color="grey-7"
+            text-color="white"
+            @click="prevStep()"
+            size="lg"
+            class="text-weight-medium back-button"
+            no-caps
+            icon="arrow_back"
+            label="Back to Edit"
+          >
+          </q-btn>
+
+          <q-btn
+            unelevated
+            :color="validationSummary.length === 0 ? 'positive' : 'grey-5'"
+            @click="saveTargets()"
+            :disabled="validationSummary.length > 0"
+            size="lg"
+            class="text-weight-bold confirm-button"
+            no-caps
+            icon="check_circle"
+            :label="validationSummary.length === 0 ? 'Confirm and Activate' : 'Fix Issues to Activate'"
+          >
+          </q-btn>
+        </div>
       </q-card-section>
     </q-card>
   </div>
 
+  <!-- Right Sidebar: Info Panel -->
   <div class="col-12 col-md-4 q-gutter-y-md">
     <q-card>
       <q-card-section>
@@ -136,38 +580,87 @@
         </h6>
       </q-card-section>
       <q-separator></q-separator>
-      <q-card>
-        <q-card-section>
-          <p>
-            Add some targets to the list of "Target Wallets", each with an
-            associated <em>percentage</em>. After saving, every time any payment
-            arrives at the "Source Wallet" that payment will be split with the
-            target wallets according to their percentage.
-          </p>
-          <p>
-            This is valid for every payment, doesn't matter how it was created.
-          </p>
-          <p>
-            Targets can be LNBits wallets from this LNBits instance or any valid
-            LNURL or LN Address.
-          </p>
-          <p class="text-warning">
-            LNURLp and LN Addresses must allow comments > 100 chars and also
-            have a flexible amount.
-          </p>
-          <p>
-            To remove a wallet from the targets list just press the X and save.
-            To remove all, click "Delete all Targets".
-          </p>
-          <p class="text-warning">
-            For each split via LNURLp or Lightning addresses a fee_reserve is
-            substracted, because of potential routing fees.
-          </p>
-        </q-card-section>
-      </q-card>
+      <q-card-section>
+        <div class="text-subtitle2 q-mb-md">How splits work</div>
+        <p class="text-body2">
+          Add targets to split payments automatically. Every time a payment
+          arrives at the "Source Wallet", it will be split with the target
+          wallets according to their percentage.
+        </p>
+        <p class="text-body2">
+          This works for every payment, regardless of how it was created.
+        </p>
+
+        <div class="text-subtitle2 q-mb-md q-mt-md">Supported formats</div>
+        <q-list dense>
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="account_balance_wallet" size="sm" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption>LNbits wallet ID</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="link" size="sm" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption>LNURLp string</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="alternate_email" size="sm" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption>Lightning address</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <div class="text-subtitle2 q-mb-md q-mt-md">Requirements</div>
+        <q-list dense>
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="warning" size="sm" color="warning" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption
+                >LNURLp must allow comments > 100 chars</q-item-label
+              >
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="warning" size="sm" color="warning" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption
+                >Receiving wallet must accept flexible amounts</q-item-label
+              >
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <div class="text-subtitle1 q-mb-md q-mt-md">Notes on fees</div>
+        <p class="text-body2">
+          For each split sent to a Lightning address or LNURLp, a "Fee Reserve"
+          is subtracted to cover potential routing fees. This fee is not
+          deducted from the recipient's wallet, but from the source wallet.
+        </p>
+        <p class="text-body2">
+          If the split total is close to 100%, the payment may fail for some
+          recipients because of routing fees. Keep this in mind when setting up
+          splits for a wallet where small payments are common.
+        </p>
+      </q-card-section>
     </q-card>
   </div>
 </div>
+{% endblock %} {% block styles %}
+<link rel="stylesheet" href="/splitpayments/static/css/index.css" />
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
+<script src="/splitpayments/static/js/split-payments-chart.js"></script>
 <script src="/splitpayments/static/js/index.js"></script>
 {% endblock %}
