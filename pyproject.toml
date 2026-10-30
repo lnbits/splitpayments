@@ -1,18 +1,18 @@
 [project]
 name = "splitpayments"
-version = "1.1.1"
-requires-python = ">=3.10,<3.13"
+version = "1.2.0"
+requires-python = ">=3.10,<3.14"
 description = "Send incoming payments to different targets"
 authors = [{name = "benarc"}, {name = "dni"}, {name = "alan"}]
 urls = { Homepage = "https://lnbits.com", Repository = "https://github.com/lnbits/splitpayments" }
 
-dependencies = [ "lnbits>1" ]
+dependencies = [ "lnbits>=1.7.0rc1" ]
 
 [tool.poetry]
 package-mode = false
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "black",
     "pytest-asyncio",
     "pytest",
@@ -21,6 +21,12 @@ dev-dependencies = [
     "ruff",
     "pytest-md",
 ]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+
+[tool.uv]
+build-constraint-dependencies = ["scikit-build-core<0.10"]
 
 [tool.mypy]
 exclude = "(nostr/*)"
