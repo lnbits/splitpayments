@@ -6,11 +6,7 @@ function hashTargets(targets) {
 }
 
 function isTargetComplete(target) {
-  return (
-    target.wallet &&
-    target.wallet.trim() !== '' &&
-    (target.percent > 0 || target.tag != '')
-  )
+  return target.wallet && target.wallet.trim() !== '' && target.percent > 0
 }
 
 window.app = Vue.createApp({

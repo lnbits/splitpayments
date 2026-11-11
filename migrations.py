@@ -102,7 +102,7 @@ async def m003_add_id_and_tag(db: Connection):
                 "wallet": row["wallet"],
                 "source": row["source"],
                 "percent": row["percent"],
-                "tag": row["tag"],
+                "tag": "",
                 "alias": row["alias"],
             },
         )

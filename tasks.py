@@ -45,16 +45,35 @@ async def on_invoice_paid(payment: Payment) -> None:
     logger.trace(f"splitpayments: performing split payments to {len(targets)} targets")
 
     for target in targets:
-        if target.percent > 0:
+        try:
+            if target.percent <= 0:
+                continue
+
             amount_msat = int(payment.amount * target.percent / 100)
+            amount_sat = amount_msat // 1000
+            if amount_sat < 1:
+                logger.warning(
+                    f"splitpayments: skipping target {target.alias or target.wallet},"
+                    f" amount too small ({amount_msat} msat)"
+                )
+                continue
+
             memo = (
                 f"Split payment: {target.percent}% "
                 f"for {target.alias or target.wallet}"
                 f";{payment.memo};{payment.payment_hash}"
             )
 
-            if "@" in target.wallet or "LNURL" in target.wallet:
+            payment_request = None
+            if "@" in target.wallet or "lnurl" in target.wallet.lower():
                 safe_amount_msat = amount_msat - fee_reserve(amount_msat)
+                if safe_amount_msat < 1000:
+                    logger.warning(
+                        f"splitpayments: skipping LNURL target"
+                        f" {target.alias or target.wallet},"
+                        f" amount after fee reserve too small"
+                    )
+                    continue
                 payment_request = await get_lnurl_invoice(
                     target.wallet, payment.wallet_id, safe_amount_msat, memo
                 )
@@ -64,24 +83,40 @@ async def on_invoice_paid(payment: Payment) -> None:
                     target.wallet = wallet.id
                 new_payment = await create_invoice(
                     wallet_id=target.wallet,
-                    amount=int(amount_msat / 1000),
+                    amount=amount_sat,
                     internal=True,
                     memo=memo,
                 )
                 payment_request = new_payment.bolt11
 
-            extra = {**payment.extra, "splitted": True}
+            if not payment_request:
+                continue
 
-            if payment_request:
-                task = asyncio.create_task(
-                    pay_invoice_in_background(
-                        payment_request=payment_request,
-                        wallet_id=payment.wallet_id,
-                        description=memo,
-                        extra=extra,
-                    )
+            extra = {**payment.extra, "splitted": True}
+            task = asyncio.create_task(
+                pay_invoice_in_background(
+                    payment_request=payment_request,
+                    wallet_id=payment.wallet_id,
+                    description=memo,
+                    extra=extra,
                 )
-                task.add_done_callback(lambda fut: logger.success(fut.result()))
+            )
+            task.add_done_callback(_log_task_result)
+
+        except Exception as e:
+            logger.error(
+                f"splitpayments: failed to process target"
+                f" {target.alias or target.wallet}: {e}"
+            )
+
+
+def _log_task_result(fut):
+    try:
+        result = fut.result()
+        if result:
+            logger.success(result)
+    except Exception as e:
+        logger.error(f"splitpayments: background task failed: {e}")
 
 
 async def pay_invoice_in_background(payment_request, wallet_id, description, extra):
